@@ -462,14 +462,17 @@ function App() {
             <div className="max-w-7xl mx-auto px-4 py-8">
                 {/* Header */}
                 <div className="text-center mb-12">
-                    <h1 className="text-7xl font-thin mb-2 text-gray-300">___________ARTWorth___________</h1>
+                    <h1 className="text-8xl font-thin mb-2 text-gray-300">ARTWorth</h1>
                     <p className="text-gray-300 font-thin text-3xl">
                         The first artwork pricing calculator that uses AI,
                         career factors, and market analysis
                     </p>
                     <h3 className="text-4xl font-thin mb-2 text-pink-400">
-                                Built by an Artist, for Artists
+                                Built by an Artist, for Artists - export report as PDF
                             </h3>
+                </div>
+                <div className="sr-only">
+                art pricing tool in NYC, art calculator Canada, price your artwork online, sculpture valuation tool, contemporary art pricing, how to price my artwork, AI art pricing software, artist income calculator, art market estimator
                 </div>
 
                 {/* Main Form */}
@@ -1589,12 +1592,15 @@ function App() {
                                     ✨ This is a living project that evolves
                                     with your input
                                 </p>
+                                <p className="text-purple-800 text-sm font-medium">
+                                    ✨ Updated 7/31/2025
+                                </p>
                             </div>
 
                             {/* Upcoming project */}
                             <div className="border-t border-gray-200 pt-6 mt-6">
                                 <h4 className="text-lg font-semibold text-gray-800 mb-3">
-                                    Coming Fall 2025: AI Art Assistant & Manager
+                                    Coming Winter 2025: AI Art Assistant & Manager
                                 </h4>
                                 <p className="text-gray-600 mb-4">
                                     I'm developing a comprehensive AI-powered
@@ -1634,7 +1640,7 @@ function App() {
                                             clipRule="evenodd"
                                         />
                                     </svg>
-                                    Artist-Tested
+                                    Used by painters, sculptures, etc.
                                 </span>
                                 <span className="flex items-center">
                                     <svg
