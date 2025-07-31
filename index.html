@@ -1,18 +1,31 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
+    <!-- Ezoic Consent Scripts (should load first) -->
     <script src="https://cmp.gatekeeperconsent.com/min.js" data-cfasync="false"></script>
     <script src="https://the.gatekeeperconsent.com/cmp.min.js" data-cfasync="false"></script>
 
+    <!-- Ezoic Standalone Header Ad Script -->
+    <script async src="//www.ezojs.com/ezoic/sa.min.js"></script>
+    <script>
+      window.ezstandalone = window.ezstandalone || {};
+      ezstandalone.cmd = ezstandalone.cmd || [];
+    </script>
+
+    <!-- Meta Information -->
     <title>ArtWorth – Smart Artwork Pricing Calculator for Artists</title>
     <meta name="description" content="Confidently price your art with ArtWorth – an intelligent calculator built for working artists. Factor in time, materials, career stage, and more.">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Open Graph (Social Sharing) -->
     <meta property="og:title" content="ArtWorth – Smart Artwork Pricing Calculator">
     <meta property="og:description" content="Confidently price your artwork with our AI-assisted pricing tool.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://artworthai.com">
-    <meta property="og:image" content="https://artworthai.com/og-image.jpg">
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta property="og:image" content="https://artworthai.com/og-image.jpg" />
+
+    <!-- Schema.org Structured Data -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -21,11 +34,10 @@
         "url": "https://artworthai.com",
         "description": "Price your artwork based on materials, labor, and career milestones with ArtWorth's intelligent pricing calculator."
       }
-      </script>
+    </script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-
