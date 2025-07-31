@@ -1,11 +1,44 @@
-import { useState } from "react";
-import "./App.css";
-import jsPDF from "jspdf";
-import OpenAI from "openai";
-import { Upload, Download, AlertCircle } from "lucide-react";
-import * as pdfjsLib from "pdfjs-dist";
+declare global {
+    interface PromiseConstructor {
+      withResolvers<T>(): {
+        promise: Promise<T>;
+        resolve: (value: T | PromiseLike<T>) => void;
+        reject: (reason?: any) => void;
+      };
+    }
+  }
+  
+  // Polyfill for Promise.withResolvers
+  if (typeof Promise.withResolvers === 'undefined') {
+    (Promise as any).withResolvers = function<T>() {
+      let resolve: (value: T | PromiseLike<T>) => void;
+      let reject: (reason?: any) => void;
+      const promise = new Promise<T>((res, rej) => {
+        resolve = res;
+        reject = rej;
+      });
+      return { promise, resolve: resolve!, reject: reject! };
+    };
+  }
+  
+  export {};
+  
+  import { useState } from "react";
+  import "./App.css";
+  import jsPDF from "jspdf";
+  import OpenAI from "openai";
+  import { Upload, Download, AlertCircle } from "lucide-react";
+  
+  import * as pdfjsLib from "pdfjs-dist";
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
+// v5.x worker setup
+if (typeof window !== 'undefined') {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+    'pdfjs-dist/build/pdf.worker.min.mjs',
+    import.meta.url,
+  ).toString();
+}
+
 
 interface ArtworkDetails {
     title: string;
@@ -33,6 +66,8 @@ interface TimeInvestment {
 }
 
 interface CareerInfo {
+    fellowshipDetails: any;
+    fellowships: any;
     yearsExperience: number;
     exhibitions: number;
     exhibitionDetails: string; 
@@ -42,7 +77,7 @@ interface CareerInfo {
     publicationDetails: string; 
     residencies: number; // Add this
     residencyDetails: string; // Add this
-    representation: "none" | "local" | "national" | "international";
+    representation: "none" | "emerging" | "midsize" | "bluechip" | "megagallery";
     education: string;
     portfolio: string;
     notableAchievements: string[];
@@ -55,7 +90,6 @@ interface MarketFactors {
         | "emerging-collectors"
         | "collectors"
         | "institutions";
-    competitionLevel: "low" | "medium" | "high";
     economicClimate: "recession" | "slow" | "stable" | "growing";
     trendingStyles: string;
     location: string;
@@ -116,6 +150,8 @@ function App() {
         publicationDetails: "",
         residencies: 0,
         residencyDetails: "",
+        fellowships: 0,
+        fellowshipDetails: "",
         representation: "none",
         education: "",
         portfolio: "",
@@ -125,7 +161,6 @@ function App() {
     const [marketFactors, setMarketFactors] = useState<MarketFactors>({
         demandLevel: "medium",
         targetMarket: "collectors",
-        competitionLevel: "medium",
         economicClimate: "stable",
         trendingStyles: "",
         location: "",
@@ -173,14 +208,16 @@ function App() {
                         content: `Extract career information from this CV and return it as JSON with:
             - yearsExperience (number)
             - exhibitions (number)
-            - exhibitionDetails (string - list major venues)
+            - exhibitionDetails (string - list venues)
             - awards (number) 
-            - awardDetails (string - list significant awards)
+            - awardDetails (string - list awards)
+            - fellowships (number)
+            - fellowshipDetails (string - list fellowships)
             - publications (number)
-            - publicationDetails (string - list major publications)
+            - publicationDetails (string - list publications)
             - residencies (number)
-            - residencyDetails (string - list prestigious residencies)
-            - representation (string: 'none', 'local', 'national', 'international')
+            - residencyDetails (string - list residencies)
+            - representation (string: 'none', 'emerging', 'midsize', 'bluechip', 'megagallery')
             - education (string)
             - notableAchievements (array of strings, max 3)`,
                     },
@@ -215,6 +252,9 @@ function App() {
                     extractedData.publicationDetails || prev.publicationDetails,
                 residencies: extractedData.residencies || prev.residencies,
                 residencyDetails:
+                    extractedData.residencyDetails || prev.residencyDetails,
+                fellowships: extractedData.fellowships || prev.fellowships,
+                fellowshipDetails:
                     extractedData.residencyDetails || prev.residencyDetails,
                 representation:
                     extractedData.representation || prev.representation,
@@ -303,6 +343,13 @@ function App() {
                 : ""
         }
         
+        Fellowships: ${careerInfo.fellowships} total
+        ${
+            careerInfo.fellowshipDetails
+                ? `Including: ${careerInfo.fellowshipDetails}`
+                : ""
+        }
+
         Publications: ${careerInfo.publications} total
         ${
             careerInfo.publicationDetails
@@ -316,12 +363,11 @@ function App() {
         MARKET FACTORS:
         Demand Level: ${marketFactors.demandLevel}
         Target Market: ${marketFactors.targetMarket}
-        Competition: ${marketFactors.competitionLevel}
         Economic Climate: ${marketFactors.economicClimate}
         Location: ${marketFactors.location}
   
         When calculating pricing, give significant weight to:
-        - Prestigious exhibition venues (major museums = 2-3x multiplier vs. local galleries)
+        - Prestigious exhibition venues (major museums = 2-3x multiplier vs. emerging galleries)
         - Significant awards (international awards = 2x multiplier vs. regional)
         - Elite residencies (MacDowell, Yaddo = 1.5x multiplier vs. local)
         - Major publications (Artforum, Art in America = 1.5x multiplier vs. blogs)
@@ -412,27 +458,30 @@ function App() {
     };
 
     return (
-        <div className="min-h-screen bg-purple-100">
+        <div className="min-h-screen bg-gray-800">
             <div className="max-w-7xl mx-auto px-4 py-8">
                 {/* Header */}
                 <div className="text-center mb-12">
-                    <h1 className="text-7xl font-thin mb-2 text-gray-600">-=_________ARTWorth_________=-</h1>
-                    <p className="text-gray-600 text-3xl">
+                    <h1 className="text-7xl font-thin mb-2 text-gray-300">___________ARTWorth___________</h1>
+                    <p className="text-gray-300 font-thin text-3xl">
                         The first artwork pricing calculator that uses AI,
                         career factors, and market analysis
                     </p>
+                    <h3 className="text-4xl font-thin mb-2 text-pink-400">
+                                Built by an Artist, for Artists
+                            </h3>
                 </div>
 
                 {/* Main Form */}
-                <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
+                <div className="bg-gray rounded-lg shadow-lg p-8 mb-8">
                     {/* Artwork Details Section */}
                     <div className="mb-8">
-                        <h2 className="text-4xl font-light mb-6 text-pink-600">
+                        <h2 className="text-4xl font-light mb-6 text-pink-400">
                             Artwork Details
                         </h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
-                                <label className="block text-med font-bold mb-2">
+                                <label className="block text-med text-pink-400 font-bold mb-2">
                                     Title *
                                 </label>
                                 <input
@@ -449,7 +498,7 @@ function App() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-med font-bold mb-2">
+                                <label className="block text-med text-pink-400 font-bold mb-2">
                                     Medium *
                                 </label>
                                 <input
@@ -462,11 +511,11 @@ function App() {
                                         })
                                     }
                                     className="w-full p-3 border border-pink-600 rounded-md focus:ring-2 focus:ring-indigo-500"
-                                    placeholder="Oil on canvas"
+                                    placeholder="Sculpture, Painting, etc."
                                 />
                             </div>
                             <div>
-                                <label className="block text-med font-bold mb-2">
+                                <label className="block text-pink-400 text-med font-bold mb-2">
                                     Year Created
                                 </label>
                                 <input
@@ -485,7 +534,7 @@ function App() {
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                             <div>
-                                <label className="block text-med font-bold mb-2">
+                                <label className="block text-med text-pink-400 font-bold mb-2">
                                     Width (inches)
                                 </label>
                                 <input
@@ -502,7 +551,7 @@ function App() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-med font-bold mb-2">
+                                <label className="block text-med text-pink-400 font-bold mb-2">
                                     Height (inches)
                                 </label>
                                 <input
@@ -519,7 +568,7 @@ function App() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-med font-bold mb-2">
+                                <label className="block text-med text-pink-400 font-bold mb-2">
                                     Depth (inches)
                                 </label>
                                 <input
@@ -539,7 +588,7 @@ function App() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                             <div>
-                                <label className="block text-med font-bold mb-2">
+                                <label className="block text-med text-pink-400 font-bold mb-2">
                                     Complexity
                                 </label>
                                 <select
@@ -561,7 +610,7 @@ function App() {
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-med font-bold mb-2">
+                                <label className="block text-med text-pink-400 font-bold mb-2">
                                     Emotional Value
                                 </label>
                                 <select
@@ -585,7 +634,7 @@ function App() {
                         </div>
 
                         <div className="mt-4">
-                            <label className="block text-med font-bold mb-2">
+                            <label className="block text-med text-pink-400 font-bold mb-2">
                                 Materials Used
                             </label>
                             <textarea
@@ -605,12 +654,12 @@ function App() {
 
                     {/* Costs Section */}
                     <div className="mb-8">
-                        <h2 className="text-4xl font-light mb-6 text-orange-600">
+                        <h2 className="text-4xl font-light mb-6 text-orange-400">
                             Costs
                         </h2>
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div>
-                                <label className="block text-med font-bold mb-2">
+                                <label className="block text-orange-400 text-med font-bold mb-2">
                                     Materials ($)
                                 </label>
                                 <input
@@ -627,7 +676,7 @@ function App() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-med font-bold mb-2">
+                                <label className="block text-orange-400 text-med font-bold mb-2">
                                     Framing ($)
                                 </label>
                                 <input
@@ -644,24 +693,26 @@ function App() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-med font-bold mb-2">
-                                    Studio Costs ($)
+                                <label className="block text-med text-orange-400 font-bold mb-2">
+                                    Studio Overhead (per artwork) ($)
+                                    {/* <span className="text-xs text-gray-500 block font-normal">
+                                    Your share of monthly studio costs for this piece
+                                    </span> */}
                                 </label>
                                 <input
                                     type="number"
                                     value={costs.studio}
-                                    onChange={(e) =>
-                                        setCosts({
-                                            ...costs,
-                                            studio: Number(e.target.value),
-                                        })
-                                    }
+                                    onChange={(e) => setCosts({...costs, studio: Number(e.target.value)})}
                                     className="w-full p-3 border border-orange-600 rounded-md focus:ring-2 focus:ring-indigo-500"
                                     min="0"
+                                    placeholder="50"
                                 />
-                            </div>
+                                <p className="text-xs text-gray-300 mt-1">
+                                    Example: If studio rent is $1000/month and you make 20 pieces/month, enter $50
+                                </p>
+                                </div>
                             <div>
-                                <label className="block text-med font-bold mb-2">
+                                <label className="block text-med text-orange-400 font-bold mb-2">
                                     Other Costs ($)
                                 </label>
                                 <input
@@ -682,12 +733,12 @@ function App() {
 
                     {/* Time Investment Section */}
                     <div className="mb-8">
-                        <h2 className="text-4xl font-light mb-6 text-yellow-600">
+                        <h2 className="text-4xl font-light mb-6 text-yellow-400">
                             Hours
                         </h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
-                                <label className="block text-med font-bold mb-2">
+                                <label className="block text-med text-yellow-400 font-bold mb-2">
                                     Concept Development
                                 </label>
                                 <input
@@ -706,7 +757,7 @@ function App() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-med font-bold mb-2">
+                                <label className="block text-med text-yellow-400 font-bold mb-2">
                                     Creation
                                 </label>
                                 <input
@@ -723,7 +774,7 @@ function App() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-med font-bold mb-2">
+                                <label className="block text-med text-yellow-400 font-bold mb-2">
                                     Finishing
                                 </label>
                                 <input
@@ -745,8 +796,11 @@ function App() {
                     {/* Career Information Section */}
                     <div className="mb-8">
                         <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-4xl font-light mb-6 text-red-700">
-                                Career Information
+                            <h2 className="text-4xl font-light mb-6 text-red-400">
+                                Career Information 
+                            </h2>
+                            <h2 className="text-2xl font-light mb-6 text-red-400">
+                                Enter manually or attach CV 
                             </h2>
                             <div className="border-2 border-line border-gray-300 rounded-lg p-4">
                                 <input
@@ -766,8 +820,8 @@ function App() {
                                         cvProcessing ? "opacity-50" : ""
                                     }`}
                                 >
-                                    <Upload className="w-5 h-5 mr-2 text-red-700" />
-                                    <span className="text-sm text-red-700">
+                                    <Upload className="w-5 h-5 mr-2 text-red-400" />
+                                    <span className="text-sm text-red-400">
                                         {cvProcessing
                                             ? "Processing..."
                                             : "Upload CV (PDF)"}
@@ -781,9 +835,9 @@ function App() {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                             <div>
-                                <label className="block text-med font-bold mb-2">
+                                <label className="block text-med text-red-400 font-bold mb-2">
                                     Years of Experience
                                 </label>
                                 <input
@@ -802,7 +856,7 @@ function App() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-med font-bold mb-2">
+                                <label className="block text-med text-red-400 font-bold mb-2">
                                     Number of Exhibitions
                                 </label>
                                 <input
@@ -819,7 +873,7 @@ function App() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-med font-bold mb-2">
+                                <label className="block text-med text-red-400 font-bold mb-2">
                                     Awards Won
                                 </label>
                                 <input
@@ -836,7 +890,7 @@ function App() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-med font-bold mb-2">
+                                <label className="block text-med text-red-400 font-bold mb-2">
                                     Residencies
                                 </label>
                                 <input
@@ -852,12 +906,29 @@ function App() {
                                     min="0"
                                 />
                             </div>
+                            <div>
+                                <label className="block text-med text-red-400 font-bold mb-2">
+                                    Fellowships
+                                </label>
+                                <input
+                                    type="number"
+                                    value={careerInfo.fellowships}
+                                    onChange={(e) =>
+                                        setCareerInfo({
+                                            ...careerInfo,
+                                            fellowships: Number(e.target.value),
+                                        })
+                                    }
+                                    className="w-full p-3 border border-red-400 rounded-md focus:ring-2 focus:ring-indigo-500"
+                                    min="0"
+                                />
+                            </div>
                         </div>
 
                         {/* Detailed information */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                             <div>
-                                <label className="block text-med font-bold mb-2">
+                                <label className="block text-med text-red-400 font-bold mb-2">
                                     Exhibition Details
                                 </label>
                                 <textarea
@@ -874,7 +945,7 @@ function App() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-med font-bold mb-2">
+                                <label className="block text-med text-red-400 font-bold mb-2">
                                     Award Details
                                 </label>
                                 <textarea
@@ -891,7 +962,24 @@ function App() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-med font-bold mb-2">
+                                <label className="block text-med text-red-400 font-bold mb-2">
+                                    Fellowship Details
+                                </label>
+                                <textarea
+                                    value={careerInfo.fellowshipDetails}
+                                    onChange={(e) =>
+                                        setCareerInfo({
+                                            ...careerInfo,
+                                            fellowshipDetails: e.target.value,
+                                        })
+                                    }
+                                    className="w-full p-3 border border-red-400 rounded-md focus:ring-2 focus:ring-indigo-500"
+                                    placeholder="Guggenheim Fellowship, More Art, Leslie Lohman..."
+                                    rows={2}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-med text-red-400 font-bold mb-2">
                                     Residency Details
                                 </label>
                                 <textarea
@@ -903,12 +991,12 @@ function App() {
                                         })
                                     }
                                     className="w-full p-3 border border-red-400 rounded-md focus:ring-2 focus:ring-indigo-500"
-                                    placeholder="MacDowell Colony, Yaddo, Skowhegan..."
+                                    placeholder="MacDowell, Yaddo, Skowhegan..."
                                     rows={2}
                                 />
                             </div>
                             <div>
-                                <label className="block text-med font-bold mb-2">
+                                <label className="block text-med text-red-400 font-bold mb-2">
                                     Publication Details
                                 </label>
                                 <textarea
@@ -929,7 +1017,7 @@ function App() {
                         {/* Career Factors with CV Upload Option */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                             <div>
-                                <label className="block text-med font-bold mb-2">
+                                <label className="block text-med text-red-400 font-bold mb-2">
                                     Publications
                                 </label>
                                 <input
@@ -948,7 +1036,7 @@ function App() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-med font-bold mb-2">
+                                <label className="block text-med text-red-400 font-bold mb-2">
                                     Representation Level
                                 </label>
                                 <select
@@ -958,9 +1046,10 @@ function App() {
                                             ...careerInfo,
                                             representation: e.target.value as
                                                 | "none"
-                                                | "local"
-                                                | "national"
-                                                | "international",
+                                                | "emerging"
+                                                | "midsize"
+                                                | "bluechip"
+                                                | "megagallery",
                                         })
                                     }
                                     className="w-full p-3 border border-red-400 rounded-md focus:ring-2 focus:ring-indigo-500"
@@ -968,12 +1057,15 @@ function App() {
                                     <option value="none">
                                         No Representation
                                     </option>
-                                    <option value="local">Local Gallery</option>
-                                    <option value="national">
-                                        National Gallery
+                                    <option value="emerging">Emerging Gallery</option>
+                                    <option value="midsize">
+                                        Mid Size Gallery
                                     </option>
-                                    <option value="international">
-                                        International Gallery
+                                    <option value="bluechip">
+                                        Blue Chip Gallery
+                                    </option>
+                                    <option value="megagallery">
+                                        Mega Gallery
                                     </option>
                                 </select>
                             </div>
@@ -981,7 +1073,7 @@ function App() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                             <div>
-                                <label className="block text-med font-bold mb-2">
+                                <label className="block text-med text-red-400 font-bold mb-2">
                                     Education
                                 </label>
                                 <input
@@ -998,7 +1090,7 @@ function App() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-med font-bold mb-2">
+                                <label className="block text-med text-red-400 font-bold mb-2">
                                     Portfolio Website
                                 </label>
                                 <input
@@ -1019,12 +1111,12 @@ function App() {
 
                     {/* Market Factors Section */}
                     <div className="mb-8">
-                        <h2 className="text-4xl font-light mb-6 text-purple-600">
+                        <h2 className="text-4xl font-light mb-6 text-purple-400">
                             Market Factors
                         </h2>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-med font-bold mb-2">
+                                <label className="block text-med text-purple-400 font-bold mb-2">
                                     Demand Level
                                 </label>
                                 <select
@@ -1046,7 +1138,7 @@ function App() {
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-med font-bold mb-2">
+                                <label className="block text-med text-purple-400 font-bold mb-2">
                                     Target Market
                                 </label>
                                 <select
@@ -1075,33 +1167,11 @@ function App() {
                                     </option>
                                 </select>
                             </div>
-                            <div>
-                                <label className="block text-med font-bold mb-2">
-                                    Competition Level
-                                </label>
-                                <select
-                                    value={marketFactors.competitionLevel}
-                                    onChange={(e) =>
-                                        setMarketFactors({
-                                            ...marketFactors,
-                                            competitionLevel: e.target.value as
-                                                | "low"
-                                                | "medium"
-                                                | "high",
-                                        })
-                                    }
-                                    className="w-full p-3 border border-purple-500 rounded-md focus:ring-2 focus:ring-indigo-500"
-                                >
-                                    <option value="low">Low</option>
-                                    <option value="medium">Medium</option>
-                                    <option value="high">High</option>
-                                </select>
-                            </div>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                             <div>
-                                <label className="block text-med font-bold mb-2">
+                                <label className="block text-med text-purple-400 font-bold mb-2">
                                     Economic Climate
                                 </label>
                                 <select
@@ -1125,7 +1195,7 @@ function App() {
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-med font-bold mb-2">
+                                <label className="block text-med text-purple-400 font-bold mb-2">
                                     Location
                                 </label>
                                 <input
@@ -1138,11 +1208,11 @@ function App() {
                                         })
                                     }
                                     className="w-full p-3 border border-purple-500 rounded-md focus:ring-2 focus:ring-indigo-500"
-                                    placeholder="City, Country"
+                                    placeholder="City/Country of where the work will be selling"
                                 />
                             </div>
                             <div>
-                                <label className="block text-med font-bold mb-2">
+                                <label className="block text-med text-purple-400 font-bold mb-2">
                                     Trending Styles
                                 </label>
                                 <input
@@ -1165,7 +1235,7 @@ function App() {
                     <button
                         onClick={calculatePricing}
                         disabled={isCalculating}
-                        className="w-full bg-purple-700 text-white py-4 rounded-lg font-semibold hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full bg-purple-400 text-gray py-4 rounded-lg font-semibold hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {isCalculating ? (
                             <span className="flex items-center justify-center">
@@ -1504,10 +1574,6 @@ function App() {
                 <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-1 rounded-lg">
                     <div className="bg-white rounded-lg p-8">
                         <div className="max-w-3xl mx-auto text-center">
-                            {/* Title */}
-                            <h3 className="text-2xl font-light mb-4 text-gray-800">
-                                Built by an Artist, for Artists 🎨
-                            </h3>
 
                             {/* Main message */}
                             <p className="text-gray-600 mb-6 leading-relaxed">
@@ -1528,7 +1594,7 @@ function App() {
                             {/* Upcoming project */}
                             <div className="border-t border-gray-200 pt-6 mt-6">
                                 <h4 className="text-lg font-semibold text-gray-800 mb-3">
-                                    Coming Fall 2024: AI Art Assistant & Manager
+                                    Coming Fall 2025: AI Art Assistant & Manager
                                 </h4>
                                 <p className="text-gray-600 mb-4">
                                     I'm developing a comprehensive AI-powered
