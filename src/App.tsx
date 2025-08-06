@@ -28,8 +28,8 @@ declare global {
   import jsPDF from "jspdf";
   import OpenAI from "openai";
   import { Upload, Download, AlertCircle } from "lucide-react";
-  
   import * as pdfjsLib from "pdfjs-dist";
+  import PrivacyPolicy from "./PrivacyPolicy";
 
 // v5.x worker setup
 if (typeof window !== 'undefined') {
@@ -171,9 +171,10 @@ function App() {
     );
     const [isCalculating, setIsCalculating] = useState(false);
     const [cvProcessing, setCVProcessing] = useState(false);
-    const [cvError, setCVError] = useState(""); // Fixed: added cvError
+    const [cvError, setCVError] = useState(""); 
+    const [showPrivacy, setShowPrivacy] = useState(false);
 
-    // Handle CV Upload using pdfjs-dist
+
     const handleCVUpload = async (file: File) => {
         try {
             setCVProcessing(true);
@@ -462,7 +463,7 @@ function App() {
             <div className="max-w-7xl mx-auto px-4 py-8">
                 {/* Header */}
                 <div className="text-center mb-12">
-                    <h1 className="text-8xl font-thin mb-2 text-gray-300">ARTWorth</h1>
+                    <h1 className="text-7xl font-thin mb-2 text-gray-300">ARTWorth</h1>
                     <p className="text-gray-300 font-thin text-3xl">
                         The first artwork pricing calculator that uses AI,
                         career factors, and market analysis
@@ -1669,8 +1670,31 @@ function App() {
                                         />
                                     </svg>
                                     Constantly Improving
-                                </span>
+                                </span>      
                             </div>
+                            <div className="text-center mt-10 text-sm text-gray-500">
+                                <button
+                                    onClick={() => setShowPrivacy(true)}
+                                    className="underline hover:text-gray-700"
+                                >
+                                    Privacy Policy
+                                </button>
+                            </div>
+                            {showPrivacy && (
+                                <div className="fixed inset-0 z-50 bg-white overflow-y-auto p-8">
+                                    <div className="max-w-3xl mx-auto">
+                                    <button
+                                        onClick={() => setShowPrivacy(false)}
+                                        className="text-sm underline mb-4 text-gray-500 hover:text-gray-700"
+                                    >
+                                        Close
+                                    </button>
+                                    <PrivacyPolicy />
+                                    </div>
+                                </div>
+                                )}
+
+
                         </div>
                     </div>
                 </div>
