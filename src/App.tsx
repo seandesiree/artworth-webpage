@@ -29,7 +29,8 @@ declare global {
   import OpenAI from "openai";
   import { Upload, Download, AlertCircle } from "lucide-react";
   import * as pdfjsLib from "pdfjs-dist";
-  import PrivacyPolicy from "./PrivacyPolicy";
+  import { Link } from 'react-router-dom'
+
 
 // v5.x worker setup
 if (typeof window !== 'undefined') {
@@ -172,7 +173,6 @@ function App() {
     const [isCalculating, setIsCalculating] = useState(false);
     const [cvProcessing, setCVProcessing] = useState(false);
     const [cvError, setCVError] = useState(""); 
-    const [showPrivacy, setShowPrivacy] = useState(false);
 
 
     const handleCVUpload = async (file: File) => {
@@ -1672,29 +1672,18 @@ function App() {
                                     Constantly Improving
                                 </span>      
                             </div>
-                            <div className="text-center mt-10 text-sm text-gray-500">
-                                <button
-                                    onClick={() => setShowPrivacy(true)}
-                                    className="underline hover:text-gray-700"
-                                >
-                                    Privacy Policy
-                                </button>
+    
+
+                            <div>
+                            {/* Your homepage layout */}
+                            <footer className="text-xs text-gray-500 mt-10 text-center">
+                                <Link to="/privacypolicy" className="underline hover:text-gray-700">
+                                Privacy Policy
+                                </Link>
+                            </footer>
                             </div>
-                            {showPrivacy && (
-                                <div className="fixed inset-0 z-50 bg-white overflow-y-auto p-8">
-                                    <div className="max-w-3xl mx-auto">
-                                    <button
-                                        onClick={() => setShowPrivacy(false)}
-                                        className="text-sm underline mb-4 text-gray-500 hover:text-gray-700"
-                                    >
-                                        Close
-                                    </button>
-                                    <PrivacyPolicy />
-                                    </div>
-                                </div>
-                                )}
-
-
+                        
+                
                         </div>
                     </div>
                 </div>
