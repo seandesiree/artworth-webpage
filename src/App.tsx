@@ -463,10 +463,15 @@ function App() {
             <div className="max-w-7xl mx-auto px-4 py-8">
                 {/* Header */}
                 <div className="text-center mb-12">
-                    <h1 className="text-7xl font-thin mb-2 text-gray-300">ARTWorth</h1>
-                    <p className="text-gray-300 font-thin text-3xl">
+                    <h1 className="text-7xl font-thin mb-2 text-gray-300">ARTWorth - Smart Artwork Pricing Calculator</h1>
+                    <p className="text-gray-300 font-bold text-3xl">
                         The first artwork pricing calculator that uses AI,
                         career factors, and market analysis
+                    </p>
+                    <p className="text-gray-300 font-thin text-3xl">
+                    Price your art with confidence. ArtWorth helps artists factor in time,
+                    materials, career stage, and more to create fair and professional
+                    pricing for their work.
                     </p>
                     <h3 className="text-4xl font-thin mb-2 text-pink-400">
                                 Built by an Artist, for Artists - export report as PDF
@@ -1271,6 +1276,47 @@ function App() {
                     </button>
                 </div>
 
+                {/* Extra Content */}
+                <section style={{ padding: "2rem", maxWidth: "800px", margin: "0 auto" }}>
+                    <h2 className="text-gray-300 font-bold text-4xl">How to Price Your Artwork</h2>
+                    <p className="text-gray-300 font-thin text-2xl">
+                    Pricing artwork can be one of the hardest parts of being a professional
+                    artist. A good price reflects not just the cost of materials, but also
+                    your time, skill, career stage, and the uniqueness of the work. By
+                    combining these factors, you ensure you’re valuing your art — and
+                    yourself — appropriately.
+                    </p>
+
+                    <h2 className="text-gray-300 font-bold text-4xl">Why Pricing Matters for Artists</h2>
+                    <p className="text-gray-300 font-thin text-2xl">
+                    The right price communicates your professionalism and helps collectors
+                    understand the value of your work. Consistent, fair pricing can make it
+                    easier to sell, build trust with buyers, and position you for growth in
+                    galleries or online marketplaces.
+                    </p>
+
+                    <h2 className="text-gray-300 font-bold text-4xl">How ArtWorth Works</h2>
+                    <p className="text-gray-300 font-thin text-2xl">
+                    ArtWorth takes your inputs — such as hours worked, material costs, and
+                    artistic experience — and uses an intelligent formula to recommend a
+                    fair, market-aligned price. You can adjust for factors like gallery
+                    commission or limited editions, so your final price truly fits your
+                    unique piece.
+                    </p>
+                </section>
+
+                {/* Testimonials */}
+                <section style={{ background: "#f8f8f8", padding: "2rem" }}>
+                    <blockquote>
+                    “It takes the guess work out of pricing work.” — Celeste, Interdisciplinary Artist
+                    </blockquote>
+                    <blockquote>
+                    “I feel empowered to price work confidently. I can see how it will help my career.” —
+                    Alisa, Mixed Media Artist
+                    </blockquote>
+                </section>
+
+
                 {/* Results Section */}
                 {pricingResult && (
                     <div className="bg-white rounded-lg shadow-lg p-8">
@@ -1555,7 +1601,7 @@ function App() {
                 )}
 
                 {/* Footer */}
-                <div className="mt-12 text-center text-sm text-gray-500">
+                <div className="mt-12 text-center text-sm text-gray-300">
                     <p>
                         Pricing calculations are suggestions based on provided
                         data.
@@ -1676,10 +1722,12 @@ function App() {
 
                             <div>
                             {/* Your homepage layout */}
-                            <footer className="text-xs text-gray-500 mt-10 text-center">
+                            <footer className="text-s text-gray-500 mt-10 text-center">
+                                <Link to="/about" className="underline hover:text-gray-700">About</Link> |{" "}
                                 <Link to="/privacypolicy" className="underline hover:text-gray-700">
                                 Privacy Policy
-                                </Link>
+                                </Link> |{" "}
+                                <Link to="/artist-pricing-guide" className="underline hover:text-gray-700">Artist Pricing Guide</Link>
                             </footer>
                             </div>
                         
