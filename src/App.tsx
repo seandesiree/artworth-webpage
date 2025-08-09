@@ -1722,7 +1722,7 @@ function App() {
 
                             <div>
                             {/* Your homepage layout */}
-                            <footer className="text-s text-gray-500 mt-10 text-center">
+                            <footer className="text-s text-gray-600 mt-10 text-center">
                                 <Link to="/about" className="underline hover:text-gray-700">About</Link> |{" "}
                                 <Link to="/privacypolicy" className="underline hover:text-gray-700">
                                 Privacy Policy
