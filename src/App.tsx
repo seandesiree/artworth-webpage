@@ -481,6 +481,51 @@ function App() {
                 art pricing tool in NYC, art calculator Canada, price your artwork online, sculpture valuation tool, contemporary art pricing, how to price my artwork, AI art pricing software, artist income calculator, art market estimator
                 </div>
 
+                {/* Extra Content */}
+                <section style={{ padding: "2rem", maxWidth: "800px", margin: "0 auto" }}>
+                <h2 className="text-gray-300 font-bold text-4xl mb-4">How to Price Your Artwork</h2>
+                <p className="text-gray-300 font-thin text-2xl mb-6">
+                    Pricing your artwork is one of the biggest challenges artists face. Unlike products
+                    with fixed production costs, every artwork is a unique blend of skill, time, and
+                    inspiration. A fair price should account for your materials, labor, and experience,
+                    while also reflecting the value the work brings to a buyer’s life. Many artists make
+                    the mistake of charging only for their time and supplies, forgetting to include hidden
+                    expenses like studio rent, utilities, professional tools, and even marketing costs.
+                    For example, if a 24×36” acrylic painting took 20 hours, used $75 in materials, and
+                    draws on years of expertise, your price might fairly land in the $1,000–$1,500 range
+                    once all factors are included. This approach ensures that you’re not just covering
+                    costs — you’re valuing your creative contribution.
+                </p>
+
+                <h2 className="text-gray-300 font-bold text-4xl mb-4">Why Pricing Matters for Artists</h2>
+                <p className="text-gray-300 font-thin text-2xl mb-6">
+                    The right price is more than just a number — it’s a signal of professionalism and
+                    self-respect. Collectors often interpret price as a measure of quality and rarity,
+                    and underpricing can unintentionally lower perceived value. Consistent, fair pricing
+                    builds trust, encourages repeat purchases, and helps you maintain strong relationships
+                    with galleries, agents, and online marketplaces. It also allows you to grow your
+                    career sustainably, ensuring that every sale supports your artistic practice instead
+                    of depleting it. A well-thought-out pricing strategy can help position you as a serious
+                    professional, whether you’re selling directly to collectors, at art fairs, or in
+                    established galleries.
+                </p>
+
+                <h2 className="text-gray-300 font-bold text-4xl mb-4">How ArtWorth Works</h2>
+                <p className="text-gray-300 font-thin text-2xl">
+                    ArtWorth was built to take the guesswork out of pricing. Simply input details like
+                    the hours you’ve spent, your material costs, your level of experience, and the medium
+                    you’re working in. Our intelligent formula then calculates a suggested price that
+                    reflects both your costs and current market trends. You can also customize your
+                    calculation by adding factors like gallery commission, edition size, or special
+                    handling requirements. For example, if you’re producing a limited edition print series,
+                    you can adjust your pricing to reflect its exclusivity. This flexibility means you’ll
+                    always have a price that’s fair, competitive, and aligned with your artistic vision.
+                    By making informed pricing decisions, you can focus more on creating — and less on
+                    worrying if you’re selling yourself short.
+                </p>
+                </section>
+
+
                 {/* Main Form */}
                 <div className="bg-gray rounded-lg shadow-lg p-8 mb-8">
                     {/* Artwork Details Section */}
@@ -1276,46 +1321,6 @@ function App() {
                     </button>
                 </div>
 
-                {/* Extra Content */}
-                <section style={{ padding: "2rem", maxWidth: "800px", margin: "0 auto" }}>
-                    <h2 className="text-gray-300 font-bold text-4xl">How to Price Your Artwork</h2>
-                    <p className="text-gray-300 font-thin text-2xl">
-                    Pricing artwork can be one of the hardest parts of being a professional
-                    artist. A good price reflects not just the cost of materials, but also
-                    your time, skill, career stage, and the uniqueness of the work. By
-                    combining these factors, you ensure you’re valuing your art — and
-                    yourself — appropriately.
-                    </p>
-
-                    <h2 className="text-gray-300 font-bold text-4xl">Why Pricing Matters for Artists</h2>
-                    <p className="text-gray-300 font-thin text-2xl">
-                    The right price communicates your professionalism and helps collectors
-                    understand the value of your work. Consistent, fair pricing can make it
-                    easier to sell, build trust with buyers, and position you for growth in
-                    galleries or online marketplaces.
-                    </p>
-
-                    <h2 className="text-gray-300 font-bold text-4xl">How ArtWorth Works</h2>
-                    <p className="text-gray-300 font-thin text-2xl">
-                    ArtWorth takes your inputs — such as hours worked, material costs, and
-                    artistic experience — and uses an intelligent formula to recommend a
-                    fair, market-aligned price. You can adjust for factors like gallery
-                    commission or limited editions, so your final price truly fits your
-                    unique piece.
-                    </p>
-                </section>
-
-                {/* Testimonials */}
-                <section style={{ background: "#f8f8f8", padding: "2rem" }}>
-                    <blockquote>
-                    “It takes the guess work out of pricing work.” — Celeste, Interdisciplinary Artist
-                    </blockquote>
-                    <blockquote>
-                    “I feel empowered to price work confidently. I can see how it will help my career.” —
-                    Alisa, Mixed Media Artist
-                    </blockquote>
-                </section>
-
 
                 {/* Results Section */}
                 {pricingResult && (
@@ -1634,26 +1639,26 @@ function App() {
                             </p>
 
                             {/* Living site note */}
-                            <div className="bg-purple-50 rounded-lg p-4 mb-6">
+                            {/* <div className="bg-purple-50 rounded-lg p-4 mb-6">
                                 <p className="text-purple-800 text-sm font-medium">
                                     ✨ This is a living project that evolves
                                     with your input
                                 </p>
                                 <p className="text-purple-800 text-sm font-medium">
-                                    ✨ Updated 7/31/2025
+                                    ✨ Updated 8/8/2025
                                 </p>
-                            </div>
+                            </div> */}
 
                             {/* Upcoming project */}
                             <div className="border-t border-gray-200 pt-6 mt-6">
-                                <h4 className="text-lg font-semibold text-gray-800 mb-3">
+                                {/* <h4 className="text-lg font-semibold text-gray-800 mb-3">
                                     Coming Winter 2025: AI Art Assistant & Manager
                                 </h4>
                                 <p className="text-gray-600 mb-4">
                                     I'm developing a comprehensive AI-powered
                                     app to help artists manage their careers,
                                     inventory, sales, and creative process.
-                                </p>
+                                </p> */}
 
                                 {/* CTA Buttons */}
                                 <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mt-6">
@@ -1721,9 +1726,9 @@ function App() {
     
 
                             <div>
-                            {/* Your homepage layout */}
+                            {/* Homepage layout */}
                             <footer className="text-s text-gray-600 mt-10 text-center">
-                                <Link to="/about" className="underline hover:text-gray-700">About</Link> |{" "}
+                                <Link to="/about" className="underline hover:text-gray-700">About + Contact</Link> |{" "}
                                 <Link to="/privacypolicy" className="underline hover:text-gray-700">
                                 Privacy Policy
                                 </Link> |{" "}
