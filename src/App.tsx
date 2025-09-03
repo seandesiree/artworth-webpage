@@ -26,10 +26,13 @@ if (typeof Promise.withResolvers === "undefined") {
 import { useState } from "react"
 import "./App.css"
 import jsPDF from "jspdf"
-import OpenAI from "openai"
-import { Upload, Download, AlertCircle } from "lucide-react"
+import { Upload, Download, AlertCircle, ChevronDown } from "lucide-react"
 import * as pdfjsLib from "pdfjs-dist"
 import { Link } from "react-router-dom"
+import { motion } from "framer-motion"
+
+
+
 
 // v5.x worker setup
 if (typeof window !== "undefined") {
@@ -71,8 +74,8 @@ interface CareerInfo {
   awardDetails: string
   publications: number
   publicationDetails: string
-  residencies: number // Add this
-  residencyDetails: string // Add this
+  residencies: number 
+  residencyDetails: string 
   representation: "none" | "emerging" | "midsize" | "bluechip" | "megagallery"
   education: string
   portfolio: string
@@ -99,11 +102,34 @@ interface PricingResult {
   recommendations: string[]
 }
 
-// Initialize OpenAI
-const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true,
-})
+const AccordionItem = ({ title, content, color }: { title: string; content: string; color: string }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="mb-4">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={`w-full flex justify-between items-center ${color} font-bold outline rounded-full p-4 text-4xl hover:opacity-90 transition-all`}
+      >
+        {title}
+        <ChevronDown className={`w-6 h-6 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+      <div
+        className={`overflow-hidden transition-all duration-500 ${
+          isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+        }`}
+      >
+        <p className="text-gray-300 text-2xl p-6 bg-gray-800 rounded-lg mt-2">
+          {content}
+        </p>
+      </div>
+    </div>
+  );
+};
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+
+
 
 function App() {
   // State variables
@@ -158,66 +184,129 @@ function App() {
     location: "",
   })
 
+  const countFields = (obj: any): number => Object.keys(obj).length
+
+  const countCompletedFields = (obj: any): number =>
+    Object.values(obj).filter((value) => {
+      if (typeof value === "string") return value.trim() !== ""
+      if (typeof value === "number") return value > 0
+      if (Array.isArray(value)) return value.length > 0
+      return value !== null && value !== undefined
+    }).length
+
+  const totalFields =
+    countFields(artworkDetails) +
+    countFields(costs) +
+    countFields(timeInvestment) +
+    countFields(careerInfo) +
+    countFields(marketFactors)
+
+  const completedFields =
+    countCompletedFields(artworkDetails) +
+    countCompletedFields(costs) +
+    countCompletedFields(timeInvestment) +
+    countCompletedFields(careerInfo) +
+    countCompletedFields(marketFactors)
+
+  const progress = (completedFields / totalFields) * 100
+
   const [pricingResult, setPricingResult] = useState<PricingResult | null>(null)
   const [isCalculating, setIsCalculating] = useState(false)
   const [cvProcessing, setCVProcessing] = useState(false)
   const [cvError, setCVError] = useState("")
+  const [aiResult, setAiResult] = useState("");
+
+  async function getAnalysis(prompt: string) {
+    try {
+      const res = await fetch(`${BACKEND_URL}/analyze`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch analysis");
+      }
+
+      const data = await res.json();
+      return data.result;
+    } catch (error) {
+      console.error("Error fetching analysis:", error);
+      return "Sorry, something went wrong with the AI analysis.";
+    }
+  }
+
+  const handleSubmit = async () => {
+    try {
+      setIsCalculating(true);
+      
+      // First calculate the pricing
+      await calculatePricing();
+      
+      // Then get the analysis explanation
+      const prompt = "Explain how my artwork pricing is calculated...";
+      const analysis = await getAnalysis(prompt);
+      console.log("AI Analysis:", analysis);
+      setAiResult(analysis);
+      
+    } catch (err) {
+      console.error("Error in handleSubmit:", err);
+    } finally {
+      setIsCalculating(false);
+    }
+  };
 
   const handleCVUpload = async (file: File) => {
     try {
-      setCVProcessing(true)
-      setCVError("")
-
-      const arrayBuffer = await file.arrayBuffer()
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
-
-      let fullText = "" // Declare fullText here
-
+      setCVProcessing(true);
+      setCVError("");
+  
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  
+      let fullText = "";
+  
       // Extract text from all pages
       for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i)
-        const textContent = await page.getTextContent()
-        const pageText = textContent.items.map((item: any) => item.str).join(" ")
-        fullText += pageText + "\n"
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map((item: any) => item.str).join(" ");
+        fullText += pageText + "\n";
       }
-
+  
       if (!fullText.trim()) {
-        throw new Error("No text found in PDF")
+        throw new Error("No text found in PDF");
       }
-
-      // Extract information using OpenAI
-      const response = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: [
-          {
-            role: "system",
-            content: `Extract career information from this CV and return it as JSON with:
-            - yearsExperience (number)
-            - exhibitions (number)
-            - exhibitionDetails (string - list venues)
-            - awards (number) 
-            - awardDetails (string - list awards)
-            - fellowships (number)
-            - fellowshipDetails (string - list fellowships)
-            - publications (number)
-            - publicationDetails (string - list publications)
-            - residencies (number)
-            - residencyDetails (string - list residencies)
-            - representation (string: 'none', 'emerging', 'midsize', 'bluechip', 'megagallery')
-            - education (string)
-            - notableAchievements (array of strings, max 3)`,
-          },
-          {
-            role: "user",
-            content: `Extract information from this CV:\n\n${fullText.substring(0, 4000)}`,
-          },
-        ],
-        temperature: 0.3,
-        max_tokens: 800,
-      })
-
-      const extractedData = JSON.parse(response.choices[0].message.content || "{}")
-
+  
+      // Call your backend endpoint
+      const response = await fetch(`${BACKEND_URL}/extract-career`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fullText }),
+      });
+  
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Server error: ${errorText}`);
+      }
+  
+      const data = await response.json();
+      console.log("Backend response:", data); // Debug log
+  
+      // Parse the careerInfo with better error handling
+      let extractedData;
+      try {
+        // Handle if careerInfo is already an object or needs parsing
+        if (typeof data.careerInfo === 'string') {
+          extractedData = JSON.parse(data.careerInfo);
+        } else {
+          extractedData = data.careerInfo;
+        }
+      } catch (parseError) {
+        console.error("Failed to parse career info:", data.careerInfo);
+        throw new Error("Invalid response format from AI");
+      }
+  
       // Update form with extracted data
       setCareerInfo((prev) => ({
         ...prev,
@@ -231,192 +320,203 @@ function App() {
         residencies: extractedData.residencies || prev.residencies,
         residencyDetails: extractedData.residencyDetails || prev.residencyDetails,
         fellowships: extractedData.fellowships || prev.fellowships,
-        fellowshipDetails: extractedData.residencyDetails || prev.residencyDetails,
+        fellowshipDetails: extractedData.fellowshipDetails || prev.fellowshipDetails,
         representation: extractedData.representation || prev.representation,
         education: extractedData.education || prev.education,
         notableAchievements: extractedData.notableAchievements || prev.notableAchievements,
-      }))
-
-      setCVProcessing(false)
+      }));
+  
+      setCVProcessing(false);
     } catch (error) {
-      console.error("CV processing failed:", error)
-      setCVError(error instanceof Error ? error.message : "Failed to process CV")
-      setCVProcessing(false)
+      console.error("CV processing failed:", error);
+      setCVError(error instanceof Error ? error.message : "Failed to process CV");
+      setCVProcessing(false);
     }
-  }
+  };
 
-  // Calculate pricing
-  const calculatePricing = async () => {
-    try {
-      setIsCalculating(true)
-
-      // Validate required fields
-      if (!artworkDetails.title || !artworkDetails.medium) {
-        alert("Please fill in artwork title and medium")
-        setIsCalculating(false)
-        return
-      }
 
       const totalHours = timeInvestment.conceptDevelopment + timeInvestment.creation + timeInvestment.finishing
 
       const totalCosts = costs.materials + costs.framing + costs.studio + costs.other
-      // Create comprehensive prompt for OpenAI
-      const prompt = `As an art pricing consultant, analyze the following artwork details and provide pricing recommendations:
+
+// Add the function declaration
+const calculatePricing = async () => {
+  try {
+    setIsCalculating(true);
+    
+    const prompt = `As an art pricing consultant, analyze the following artwork details and provide pricing recommendations:
   
-        ARTWORK: "${artworkDetails.title}"
-        Medium: ${artworkDetails.medium}
-        Size: ${artworkDetails.width}" × ${artworkDetails.height}" ${
-          artworkDetails.depth ? `× ${artworkDetails.depth}"` : ""
-        }
-        Year: ${artworkDetails.yearCreated}
-        Materials: ${artworkDetails.materialsUsed}
-        Complexity: ${artworkDetails.complexity}
-        Emotional Value: ${artworkDetails.emotionalValue}
-  
-        COSTS:
-        Materials: $${costs.materials}
-        Framing: $${costs.framing}
-        Studio: $${costs.studio}
-        Other: $${costs.other}
-        Total Costs: $${totalCosts}
-  
-        TIME INVESTMENT:
-        Total Hours: ${totalHours}
-        (Concept: ${timeInvestment.conceptDevelopment}h, Creation: ${
-          timeInvestment.creation
-        }h, Finishing: ${timeInvestment.finishing}h)
-  
-        ARTIST CAREER:
-        Experience: ${careerInfo.yearsExperience} years
-        
-        Exhibitions: ${careerInfo.exhibitions} total
-        ${careerInfo.exhibitionDetails ? `Venues: ${careerInfo.exhibitionDetails}` : ""}
-        
-        Awards: ${careerInfo.awards} total
-        ${careerInfo.awardDetails ? `Including: ${careerInfo.awardDetails}` : ""}
-        
-        Residencies: ${careerInfo.residencies} total
-        ${careerInfo.residencyDetails ? `Including: ${careerInfo.residencyDetails}` : ""}
-        
-        Fellowships: ${careerInfo.fellowships} total
-        ${careerInfo.fellowshipDetails ? `Including: ${careerInfo.fellowshipDetails}` : ""}
-
-        Publications: ${careerInfo.publications} total
-        ${careerInfo.publicationDetails ? `Featured in: ${careerInfo.publicationDetails}` : ""}
-        
-        Representation: ${careerInfo.representation}
-        Education: ${careerInfo.education}
-  
-        MARKET FACTORS:
-        Demand Level: ${marketFactors.demandLevel}
-        Target Market: ${marketFactors.targetMarket}
-        Economic Climate: ${marketFactors.economicClimate}
-        Location: ${marketFactors.location}
-  
-        When calculating pricing, give significant weight to:
-        - Prestigious exhibition venues (major museums = 2-3x multiplier vs. emerging galleries)
-        - Significant awards (international awards = 2x multiplier vs. regional)
-        - Elite residencies (MacDowell, Yaddo = 1.5x multiplier vs. local)
-        - Major publications (Artforum, Art in America = 1.5x multiplier vs. blogs)
-        - Quality over quantity for all achievements
-  
-        Provide pricing recommendations in JSON format with:
-        - baseCost (number - covering costs + fair hourly rate)
-        - marketPrice (number - competitive market positioning)
-        - premiumPrice (number - collector/gallery pricing)
-        - reasoning object with:
-          - costBreakdown (string - explain the cost calculation in plain text)
-          - marketAnalysis (string - explain market positioning in plain text)
-          - valueProposition (string - explain the unique value in plain text)
-        - recommendations (array of strings - 3-5 strategic pricing tips)
-
-        Ensure all reasoning fields are plain text strings, not objects.`
-
-      const response = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are an expert art pricing consultant. Return only valid JSON without any markdown formatting, code blocks, or trailing commas.",
-          },
-          { role: "user", content: prompt },
-        ],
-        temperature: 0.7,
-        max_tokens: 800,
-      })
-
-      // Clean the response
-      let content = response.choices[0].message.content || "{}"
-
-      // Remove markdown code blocks if present
-      content = content.replace(/```json\n?/g, "").replace(/```\n?/g, "")
-
-      // Remove trailing commas before } or ]
-      content = content.replace(/,\s*([}\]])/g, "$1")
-
-      // Trim whitespace
-      content = content.trim()
-
-      try {
-        const result = JSON.parse(content)
-        setPricingResult(result)
-      } catch (parseError) {
-        console.error("Failed to parse pricing result:", content)
-        console.error("Parse error:", parseError)
-        alert("Failed to parse pricing recommendations. Please try again.")
-      }
-    } catch (error) {
-      console.error("Pricing calculation failed:", error)
-      alert("Failed to calculate pricing. Please check your API key and try again.")
-    } finally {
-      setIsCalculating(false)
+    ARTWORK: "${artworkDetails.title}"
+    Medium: ${artworkDetails.medium}
+    Size: ${artworkDetails.width}" × ${artworkDetails.height}" ${
+      artworkDetails.depth ? `× ${artworkDetails.depth}"` : ""
     }
+    Year: ${artworkDetails.yearCreated}
+    Materials: ${artworkDetails.materialsUsed}
+    Complexity: ${artworkDetails.complexity}
+    Emotional Value: ${artworkDetails.emotionalValue}
+
+    COSTS:
+    Materials: $${costs.materials}
+    Framing: $${costs.framing}
+    Studio: $${costs.studio}
+    Other: $${costs.other}
+    Total Costs: $${totalCosts}
+
+    TIME INVESTMENT:
+    Total Hours: ${totalHours}
+    (Concept: ${timeInvestment.conceptDevelopment}h, Creation: ${
+      timeInvestment.creation
+    }h, Finishing: ${timeInvestment.finishing}h)
+
+    ARTIST CAREER:
+    Experience: ${careerInfo.yearsExperience} years
+    
+    Exhibitions: ${careerInfo.exhibitions} total
+    ${careerInfo.exhibitionDetails ? `Venues: ${careerInfo.exhibitionDetails}` : ""}
+    
+    Awards: ${careerInfo.awards} total
+    ${careerInfo.awardDetails ? `Including: ${careerInfo.awardDetails}` : ""}
+    
+    Residencies: ${careerInfo.residencies} total
+    ${careerInfo.residencyDetails ? `Including: ${careerInfo.residencyDetails}` : ""}
+    
+    Fellowships: ${careerInfo.fellowships} total
+    ${careerInfo.fellowshipDetails ? `Including: ${careerInfo.fellowshipDetails}` : ""}
+
+    Publications: ${careerInfo.publications} total
+    ${careerInfo.publicationDetails ? `Featured in: ${careerInfo.publicationDetails}` : ""}
+    
+    Representation: ${careerInfo.representation}
+    Education: ${careerInfo.education}
+
+    MARKET FACTORS:
+    Demand Level: ${marketFactors.demandLevel}
+    Target Market: ${marketFactors.targetMarket}
+    Economic Climate: ${marketFactors.economicClimate}
+    Location: ${marketFactors.location}
+
+    When calculating pricing, give significant weight to:
+    - Prestigious exhibition venues (major museums = 2-3x multiplier vs. emerging galleries)
+    - Significant awards (international awards = 2x multiplier vs. regional)
+    - Elite residencies (MacDowell, Yaddo = 1.5x multiplier vs. local)
+    - Major publications (Artforum, Art in America = 1.5x multiplier vs. blogs)
+    - Quality over quantity for all achievements
+
+    Provide pricing recommendations in JSON format with:
+    - baseCost (number - covering costs + fair hourly rate)
+    - marketPrice (number - competitive market positioning)
+    - premiumPrice (number - collector/gallery pricing)
+    - reasoning object with:
+      - costBreakdown (string - explain the cost calculation in plain text)
+      - marketAnalysis (string - explain market positioning in plain text)
+      - valueProposition (string - explain the unique value in plain text)
+    - recommendations (array of strings - 3-5 strategic pricing tips)
+
+    Ensure all reasoning fields are plain text strings, not objects.`
+
+    const response = await fetch(`${BACKEND_URL}/calculate-pricing`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+        prompt,
+        artworkDetails,
+        costs,
+        timeInvestment,
+        careerInfo,
+        marketFactors
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to calculate pricing");
+    }
+
+    const data = await response.json();
+
+    try {
+      let content = data.pricingResult || "{}";
+      
+      // If your backend returns a string that needs parsing
+      if (typeof content === 'string') {
+        // 🧹 Clean up possible formatting issues
+        content = content
+          .replace(/```json\s*/g, "")
+          .replace(/```\s*/g, "")
+          .replace(/,\s*([}\]])/g, "$1")
+          .trim();
+        
+        const parsedResult = JSON.parse(content);
+        setPricingResult(parsedResult);
+      } else {
+        // If backend already returns parsed JSON
+        setPricingResult(content);
+      }
+    } catch (parseError) {
+      // If parsing fails, show raw text
+      console.warn("Falling back to raw AI output:", data.pricingResult);
+      setAiResult(data.pricingResult);
+    }
+    
+  } catch (error) {
+    console.error("Pricing calculation failed:", error);
+    alert("Failed to calculate pricing. Please check your connection and try again.");
+  } finally {
+    setIsCalculating(false);
   }
-  // Export to PDF
-  const exportToPDF = () => {
-    if (!pricingResult) return
+};
 
-    const doc = new jsPDF()
+const exportToPDF = () => {
+  if (!pricingResult) return;
 
-    // Add content to PDF
-    doc.setFontSize(20)
-    doc.text("Artwork Pricing Report", 20, 20)
+  const doc = new jsPDF();
+  doc.setFontSize(20);
+  doc.text("Artwork Pricing Report", 20, 20);
 
-    doc.setFontSize(12)
-    doc.text(`Artwork: ${artworkDetails.title}`, 20, 40)
-    doc.text(`Medium: ${artworkDetails.medium}`, 20, 50)
-    doc.text(`Size: ${artworkDetails.width}" × ${artworkDetails.height}"`, 20, 60)
+  doc.setFontSize(12);
+  doc.text(`Artwork: ${artworkDetails.title}`, 20, 40);
+  doc.text(`Medium: ${artworkDetails.medium}`, 20, 50);
+  doc.text(`Size: ${artworkDetails.width}" × ${artworkDetails.height}"`, 20, 60);
 
-    doc.setFontSize(16)
-    doc.text("Pricing Recommendations", 20, 80)
+  doc.setFontSize(16);
+  doc.text("Pricing Recommendations", 20, 80);
 
-    doc.setFontSize(12)
-    doc.text(`Base Price: $${pricingResult.baseCost}`, 20, 90)
-    doc.text(`Market Price: $${pricingResult.marketPrice}`, 20, 100)
-    doc.text(`Premium Price: $${pricingResult.premiumPrice}`, 20, 110)
+  doc.setFontSize(12);
+  doc.text(`Base Price: $${pricingResult.baseCost}`, 20, 90);
+  doc.text(`Market Price: $${pricingResult.marketPrice}`, 20, 100);
+  doc.text(`Premium Price: $${pricingResult.premiumPrice}`, 20, 110);
 
-    // Save the PDF
-    doc.save(`${artworkDetails.title}_pricing_report.pdf`)
-  }
+  doc.save(`${artworkDetails.title}_pricing_report.pdf`);
+};     
+      
 
   return (
-    <div className="min-h-screen bg-gray-800">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-cover bg-center">
+      <div className="max-w-7xl mx-auto px-4 py-8 bg-gray-800 opacity-90">
         {/* Header */}
-
         <div className="text-center mb-12">
-          <h1 className="text-7xl font-thin mb-2 text-pink-400">How to Price Your Artwork - AI-Powered Calculator</h1>
-          <p className="text-gray-300 font-bold text-3xl">
+          <div className="bg-gradient-to-r from-pink-400 to-orange-400 hover:bg-pink-600 p-1 rounded-lg">
+            <div className="bg-gray-200 outline rounded p-1">
+              <h1 className="text-6xl font mb-1 hover:bg-pink-100 rounded-full text-pink-400">
+                ARTWorth: Smart Pricing Calculator
+              </h1>
+            </div>
+          </div>
+          <br></br>
+          <div className="bg-gradient-to-r from-yellow-400 to-red-400 p-1 rounded-lg">
+          <div className="bg-gray-200 outline hover:bg-orange-200 rounded p-1">
+          <p className="text-gray-600  rounded-full font text-3xl">
             The first artwork pricing calculator that uses AI, career factors, and market analysis
           </p>
-          <p className="text-gray-300 font-thin text-3xl">
+          <p className="text-gray-600 rounded-full font text-3xl">
             Price your art with confidence. ArtWorth helps artists factor in time, materials, career stage, and more to
             create fair and professional pricing for their work.
           </p>
-          <h3 className="text-3xl font-thin mb-2 text-gray-400">
+          <h3 className="text-3xl rounded-full font mb-2 text-gray-600">
             Built by an Artist, for Artists - export report as PDF
           </h3>
+        </div>
+        </div>
         </div>
         <div className="sr-only">
           how to price artwork, art pricing calculator, artwork valuation tool, AI art pricing, price my art online,
@@ -426,47 +526,62 @@ function App() {
 
         {/* Extra Content */}
         <section style={{ padding: "2rem", maxWidth: "1300px", margin: "0 auto" }}>
-          <h2 className="text-orange-400 font-bold text-4xl mb-4">How to Price Your Artwork</h2>
-          <p className="text-gray-300 font-thin text-2xl mb-6">
-            Pricing your artwork is one of the biggest challenges artists face. Unlike products with fixed production
-            costs, every artwork is a unique blend of skill, time, and inspiration. A fair price should account for your
-            materials, labor, and experience, while also reflecting the value the work brings to a collector’s life.
-            Many artists make the mistake of charging only for their time and supplies, forgetting to include hidden
-            expenses like studio rent, utilities, professional tools, and even marketing costs. For example, if a 24×36”
-            acrylic painting took 20 hours, used $75 in materials, and draws on years of expertise, your price might
-            fairly land in the $1,000–$1,500 range once all factors are included. This approach ensures that you’re not
-            just covering costs — you’re valuing your creative contribution.
-          </p>
+          <AccordionItem
+            title="How to Price Your Artwork"
+            color="text-orange-400"
+            content="Pricing your artwork is one of the biggest challenges artists face. Unlike products with fixed production
+        costs, every artwork is a unique blend of skill, time, and inspiration. A fair price should account for your
+        materials, labor, and experience, while also reflecting the value the work brings to a collector’s life.
+        Many artists make the mistake of charging only for their time and supplies, forgetting to include hidden
+        expenses like studio rent, utilities, professional tools, and even marketing costs. For example, if a 24×36”
+        acrylic painting took 20 hours, used $75 in materials, and draws on years of expertise, your price might
+        fairly land in the $1,000–$1,500 range once all factors are included. This approach ensures that you’re not
+        just covering costs — you’re valuing your creative contribution."
+          />
 
-          <h2 className="text-yellow-400 font-bold text-4xl mb-4">Why Pricing Matters for Artists</h2>
-          <p className="text-gray-300 font-thin text-2xl mb-6">
-            The right price is more than just a number — it’s a signal of professionalism and self-respect. Collectors
-            often interpret price as a measure of quality and rarity, and underpricing can unintentionally lower
-            perceived value. Consistent, fair pricing builds trust, encourages repeat acquisitions, and helps you
-            maintain strong relationships with galleries, agents, and online marketplaces. It also allows you to grow
-            your career sustainably, ensuring that every sale supports your artistic practice instead of depleting it. A
-            well-thought-out pricing strategy can help position you as a serious professional, whether you’re selling
-            directly to collectors, at art fairs, or in established galleries.
-          </p>
+          <AccordionItem
+            title="Why Pricing Matters for Artists"
+            color="text-yellow-400"
+            content="The right price is more than just a number — it’s a signal of professionalism and self-respect. Collectors
+        often interpret price as a measure of quality and rarity, and underpricing can unintentionally lower
+        perceived value. Consistent, fair pricing builds trust, encourages repeat acquisitions, and helps you
+        maintain strong relationships with galleries, agents, and online marketplaces. It also allows you to grow
+        your career sustainably, ensuring that every sale supports your artistic practice instead of depleting it. A
+        well-thought-out pricing strategy can help position you as a serious professional, whether you’re selling
+        directly to collectors, at art fairs, or in established galleries."
+          />
 
-          <h2 className="text-red-400 font-bold text-4xl mb-4">How ArtWorth Works</h2>
-          <p className="text-gray-300 font-thin text-2xl">
-            ArtWorth was built to take the guesswork out of pricing. Simply input details like the hours you’ve spent,
-            your material costs, your level of experience, and the medium you’re working in. Our intelligent formula
-            then calculates a suggested price that reflects both your costs and current market trends. You can also
-            customize your calculation by adding factors like gallery commission, edition size, or special handling
-            requirements. For example, if you’re producing a limited edition print series, you can adjust your pricing
-            to reflect its exclusivity. This flexibility means you’ll always have a price that’s fair, competitive, and
-            aligned with your artistic vision. By making informed pricing decisions, you can focus more on creating —
-            and less on worrying if you’re selling yourself short.
-          </p>
+          <AccordionItem
+            title="How ArtWorth Works"
+            color="text-red-400"
+            content="ArtWorth was built to take the guesswork out of pricing. Simply input details like the hours you’ve spent,
+        your material costs, your level of experience, and the medium you’re working in. Our intelligent formula
+        then calculates a suggested price that reflects both your costs and current market trends. You can also
+        customize your calculation by adding factors like gallery commission, edition size, or special handling
+        requirements. For example, if you’re producing a limited edition print series, you can adjust your pricing
+        to reflect its exclusivity. This flexibility means you’ll always have a price that’s fair, competitive, and
+        aligned with your artistic vision. By making informed pricing decisions, you can focus more on creating —
+        and less on worrying if you’re selling yourself short."
+          />
         </section>
+
+        <div className="fixed bottom-6 right-6 bg-gray-900 text-white px-4 py-3 rounded-xl shadow-lg z-50">
+  <p className="text-sm mb-1">Progress: {Math.round(progress)}%</p>
+  <div className="w-40 h-2 bg-gray-700 rounded-full">
+    <motion.div
+      initial={{ width: "0%" }}
+      animate={{ width: `${progress}%` }}
+      transition={{ duration: 0.6, ease: "easeInOut" }}
+      className="h-2 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full"
+    />
+  </div>
+</div>
 
         {/* Main Form */}
         <div className="bg-gray rounded-lg shadow-lg p-8 mb-8">
           {/* Artwork Details Section */}
           <div className="mb-8">
-            <h2 className="text-4xl font-light mb-6 text-pink-400">Artwork Details</h2>
+            <h2 className="text-4xl font-light mb-6 outline rounded-full p-2 text-pink-400">Artwork Details</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-med text-pink-400 font-bold mb-2">Title *</label>
@@ -483,6 +598,7 @@ function App() {
                   placeholder="Artwork Title"
                 />
               </div>
+
               <div>
                 <label className="block text-med text-pink-400 font-bold mb-2">Medium *</label>
                 <input
@@ -618,7 +734,7 @@ function App() {
 
           {/* Costs Section */}
           <div className="mb-8">
-            <h2 className="text-4xl font-light mb-6 text-orange-400">Costs</h2>
+            <h2 className="text-4xl font-light mb-6 outline p-2 rounded-full text-orange-400">Costs</h2>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
                 <label className="block text-orange-400 text-med font-bold mb-2">Materials ($)</label>
@@ -689,7 +805,7 @@ function App() {
 
           {/* Time Investment Section */}
           <div className="mb-8">
-            <h2 className="text-4xl font-light mb-6 text-yellow-400">Hours</h2>
+            <h2 className="text-4xl font-light mb-6 outline rounded-full p-2 text-yellow-400">Hours</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-med text-yellow-400 font-bold mb-2">Concept Development</label>
@@ -742,8 +858,8 @@ function App() {
           {/* Career Information Section */}
           <div className="mb-8">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-4xl font-light mb-6 text-red-400">Career Information</h2>
-              <h2 className="text-2xl font-light mb-6 text-red-400">Enter manually or attach CV</h2>
+              <h2 className="text-2xl font-light mb-6 outline p-2 rounded-full text-red-400">Career Information</h2>
+              <h2 className="text-2xl font-light mb-6 outline p-2 rounded-full text-red-400">Enter manually or attach CV</h2>
               <div className="border-2 border-line border-gray-300 rounded-lg p-4">
                 <input
                   type="file"
@@ -995,7 +1111,7 @@ function App() {
 
           {/* Market Factors Section */}
           <div className="mb-8">
-            <h2 className="text-4xl font-light mb-6 text-purple-400">Market Factors</h2>
+            <h2 className="text-4xl font-light outline rounded-full mb-6 p-2  text-purple-400">Market Factors</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-med text-purple-400 font-bold mb-2">Demand Level</label>
@@ -1089,35 +1205,43 @@ function App() {
               </div>
             </div>
           </div>
+          
+        {/* Calculate Button */}
+        <button
+          onClick={handleSubmit}
+          disabled={isCalculating}
+          className="w-full bg-purple-400 text-white py-4 rounded-lg font-semibold hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          //                            ^^^^^^^^^^^^ Fixed: was just "text-gray"
+        >
+          {isCalculating ? (
+            <span className="flex items-center justify-center">
+              <svg
+                className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+              Calculating Pricing...
+            </span>
+          ) : (
+            "Calculate Pricing"
+          )}
+        </button>
 
-          {/* Calculate Button */}
-          <button
-            onClick={calculatePricing}
-            disabled={isCalculating}
-            className="w-full bg-purple-400 text-gray py-4 rounded-lg font-semibold hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isCalculating ? (
-              <span className="flex items-center justify-center">
-                <svg
-                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                Calculating Pricing...
-              </span>
-            ) : (
-              "Calculate Pricing"
-            )}
-          </button>
-        </div>
+          {/* AI Result */}
+          {aiResult && (
+            <div className="mt-4 p-4 bg-gray-800 text-white rounded-lg">
+              {aiResult}
+            </div>
+          )}
+
 
         {/* Results Section */}
         {pricingResult && (
@@ -1305,11 +1429,10 @@ function App() {
         <div className="mt-12 text-center text-sm text-gray-300">
           <p>Pricing calculations are suggestions based on provided data.</p>
           <p className="mt-1">Always consider your local market conditions and personal circumstances.</p>
-          {!import.meta.env.VITE_OPENAI_API_KEY && (
-            <p className="mt-4 text-amber-600">⚠️ Add your OpenAI API key to enable AI-powered analysis</p>
-          )}
         </div>
       </div>
+
+
 
       {/* Creator Section */}
       <div className="mt-16 mb-8">
@@ -1324,26 +1447,26 @@ function App() {
               </p>
 
               {/* Living site note */}
-              {/* <div className="bg-purple-50 rounded-lg p-4 mb-6">
+              <div className="bg-purple-50 rounded-lg p-4 mb-6">
                                 <p className="text-purple-800 text-sm font-medium">
-                                    ✨ This is a living project that evolves
+                                    This is a living project that evolves
                                     with your input
                                 </p>
                                 <p className="text-purple-800 text-sm font-medium">
-                                    ✨ Updated 8/8/2025
+                                    Updated 8/25/2025
                                 </p>
-                            </div> */}
+                            </div>
 
               {/* Upcoming project */}
               <div className="border-t border-gray-200 pt-6 mt-6">
-                {/* <h4 className="text-lg font-semibold text-gray-800 mb-3">
+                <h4 className="text-lg font-semibold text-gray-800 mb-3">
                                     Coming Winter 2025: AI Art Assistant & Manager
                                 </h4>
                                 <p className="text-gray-600 mb-4">
                                     I'm developing a comprehensive AI-powered
                                     app to help artists manage their careers,
                                     inventory, sales, and creative process.
-                                </p> */}
+                                </p>
 
                 {/* CTA Buttons */}
                 <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mt-6">
@@ -1417,6 +1540,7 @@ function App() {
           </div>
         </div>
       </div>
+    </div>
     </div>
   )
 }
