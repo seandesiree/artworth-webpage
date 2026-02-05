@@ -34,6 +34,8 @@ import { motion } from "framer-motion"
 
 
 
+
+
 // v5.x worker setup
 if (typeof window !== "undefined") {
   pdfjsLib.GlobalWorkerOptions.workerSrc = new URL("pdfjs-dist/build/pdf.worker.min.mjs", import.meta.url).toString()
@@ -109,14 +111,14 @@ const AccordionItem = ({ title, content, color }: { title: string; content: stri
     <div className="mb-4">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full flex justify-between items-center ${color} font-bold outline rounded-full p-4 text-4xl hover:opacity-90 transition-all`}
+        className={`w-full flex justify-between items-center uppercase rounded-full text-lg tracking-wide ${color} font-bold outline p-4 text-4xl hover:opacity-90 transition-all`}
       >
         {title}
         <ChevronDown className={`w-6 h-6 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
       <div
-        className={`overflow-hidden transition-all duration-500 ${
-          isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+        className={`overflow-hidden uppercase text-sm tracking-wide transition-all duration-500 ${
+          isOpen ? 'max-h-100 opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
         <p className="text-gray-300 text-2xl p-6 bg-gray-800 rounded-lg mt-2">
@@ -126,6 +128,8 @@ const AccordionItem = ({ title, content, color }: { title: string; content: stri
     </div>
   );
 };
+
+
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
 
@@ -437,9 +441,8 @@ const calculatePricing = async () => {
     try {
       let content = data.pricingResult || "{}";
       
-      // If your backend returns a string that needs parsing
       if (typeof content === 'string') {
-        // 🧹 Clean up possible formatting issues
+        // Clean up possible formatting issues
         content = content
           .replace(/```json\s*/g, "")
           .replace(/```\s*/g, "")
@@ -488,47 +491,81 @@ const exportToPDF = () => {
 
   doc.save(`${artworkDetails.title}_pricing_report.pdf`);
 };     
-      
+  
+
 
   return (
-    <div className="min-h-screen bg-cover bg-center">
-      <div className="max-w-7xl mx-auto px-4 py-8 bg-gray-800 opacity-90">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="bg-gradient-to-r from-pink-400 to-orange-400 hover:bg-pink-600 p-1 rounded-lg">
-            <div className="bg-gray-200 outline rounded p-1">
-              <h1 className="text-6xl font mb-1 hover:bg-pink-100 rounded-full text-pink-400">
-                ARTWorth: Smart Pricing Calculator
-              </h1>
+<div className="min-h-screen bg-cover bg-center relative">
+  <div className="max-w-3xl mx-auto">
+  <div className="mb-12">
+
+  <motion.div 
+            className="border-4 border-black bg-white p-8 mb-6 relative overflow-hidden"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            whileHover={{ 
+              boxShadow: '8px 8px 0px 0px rgba(0,0,0,1)',
+              transition: { duration: 0.2 }
+            }}
+          >
+            <div className="absolute top-0 right-0 w-48 h-48 bg-[#FF006E] opacity-10 dither-pattern pointer-events-none"></div>
+            <div className="relative">
+              <div className="flex items-baseline gap-4 mb-4">
+                <h1 className="uppercase text-5xl font-bold  tracking-tight">ARTWORTH</h1>
+                <div className="h-1 flex-1 bg-black max-w-[170px]"></div>
+              </div>
+              <p className="text-gray-600 max-w-[800px] font-bold text-left uppercase text-lg tracking-wide">
+                Calculate the value of your artwork using AI, career and Market factors
+              </p>
+              {/* <div className="h-2 flex-1 bg-black max-w-[450px]"></div> */}
+<br></br>
+              <p className="text-4xl font-light mb-6 outline p-2  rounded-full tracking-wide text-gray-600 max-w-[450px] font-bold text-left uppercase text-med text-lg tracking-wide">
+                Export results as a PDF for your records
+              </p>
             </div>
-          </div>
-          <br></br>
-          <div className="bg-gradient-to-r from-yellow-400 to-red-400 p-1 rounded-lg">
-          <div className="bg-gray-200 outline hover:bg-orange-200 rounded p-1">
-          <p className="text-gray-600  rounded-full font text-3xl">
-            The first artwork pricing calculator that uses AI, career factors, and market analysis
-          </p>
-          <p className="text-gray-600 rounded-full font text-3xl">
-            Price your art with confidence. ArtWorth helps artists factor in time, materials, career stage, and more to
-            create fair and professional pricing for their work.
-          </p>
-          <h3 className="text-3xl rounded-full font mb-2 text-gray-600">
-            Built by an Artist, for Artists - export report as PDF
-          </h3>
-        </div>
-        </div>
-        </div>
+          </motion.div>
+   
+
+  <div className="max-w-7xl mx-auto px-4 py-1 relative z-10">
+    <div className="text-center mb-12">
+
+      <motion.div
+        className="mt-8 space-y-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 2 }}
+      >
+      </motion.div>
+    </div>
+
         <div className="sr-only">
           how to price artwork, art pricing calculator, artwork valuation tool, AI art pricing, price my art online,
           artist pricing guide, artwork pricing formula, art market pricing, professional art pricing, contemporary art
           valuation, sculpture pricing calculator, painting price estimator, art business pricing strategy
         </div>
 
+        <motion.div 
+            className="border-4 border-black bg-white p-8 mb-8 relative overflow-hidden"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            whileHover={{ 
+              boxShadow: '8px 8px 0px 0px rgba(0,0,0,1)',
+              transition: { duration: 0.2 }
+            }}
+          >
+            <div className="absolute top-0 right-0 w-48 h-48 bg-[#FF006E] opacity-10 dither-pattern pointer-events-none"></div>
+            <div className="relative">
+              <div className="flex items-baseline gap-4 mb-4">
+                <div className="h-1 flex-1 bg-black max-w-[100px]"></div>
+  
+
         {/* Extra Content */}
         <section style={{ padding: "2rem", maxWidth: "1300px", margin: "0 auto" }}>
           <AccordionItem
             title="How to Price Your Artwork"
-            color="text-orange-400"
+            color="text-red-500"
             content="Pricing your artwork is one of the biggest challenges artists face. Unlike products with fixed production
         costs, every artwork is a unique blend of skill, time, and inspiration. A fair price should account for your
         materials, labor, and experience, while also reflecting the value the work brings to a collector’s life.
@@ -541,7 +578,7 @@ const exportToPDF = () => {
 
           <AccordionItem
             title="Why Pricing Matters for Artists"
-            color="text-yellow-400"
+            color="text-red-500"
             content="The right price is more than just a number — it’s a signal of professionalism and self-respect. Collectors
         often interpret price as a measure of quality and rarity, and underpricing can unintentionally lower
         perceived value. Consistent, fair pricing builds trust, encourages repeat acquisitions, and helps you
@@ -553,7 +590,7 @@ const exportToPDF = () => {
 
           <AccordionItem
             title="How ArtWorth Works"
-            color="text-red-400"
+            color="text-red-500"
             content="ArtWorth was built to take the guesswork out of pricing. Simply input details like the hours you’ve spent,
         your material costs, your level of experience, and the medium you’re working in. Our intelligent formula
         then calculates a suggested price that reflects both your costs and current market trends. You can also
@@ -564,10 +601,14 @@ const exportToPDF = () => {
         and less on worrying if you’re selling yourself short."
           />
         </section>
+        </div>
+        </div>
+        </motion.div>
 
-        <div className="fixed bottom-6 right-6 bg-gray-900 text-white px-4 py-3 rounded-xl shadow-lg z-50">
-  <p className="text-sm mb-1">Progress: {Math.round(progress)}%</p>
+        <div className="space-y-0">  
+          <p className="text-sm mb-1">Progress: {Math.round(progress)}%</p>
   <div className="w-40 h-2 bg-gray-700 rounded-full">
+    
     <motion.div
       initial={{ width: "0%" }}
       animate={{ width: `${progress}%` }}
@@ -578,14 +619,27 @@ const exportToPDF = () => {
 </div>
 
         {/* Main Form */}
-        <div className="bg-gray rounded-lg shadow-lg p-8 mb-8">
+        <div className="space-y-0">
+          {/* Labor Section */}
+          <motion.div 
+            className="border-4 border-black bg-white p-8 relative"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            whileHover={{ 
+              boxShadow: '8px 8px 0px 0px rgba(0,0,0,1)',
+              transition: { duration: 0.2 }
+            }}
+          >
+          <div className="absolute top-0 right-0 w-24 h-24 bg-[#FF006E] opacity-10 dither-pattern pointer-events-none"></div>
+
           {/* Artwork Details Section */}
           <div className="mb-8">
-            <h2 className="text-4xl font-light mb-6 outline rounded-full p-2 text-pink-400">Artwork Details</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <h2 className="text-4xl font-light mb-6 outline p-2 text-pink-500 rounded-full tracking-wide uppercase">Artwork Details</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-med text-pink-400 font-bold mb-2">Title *</label>
-                <input
+              <label className="uppercase text-med tracking-wide">Title</label>
+              <input
                   type="text"
                   value={artworkDetails.title}
                   onChange={(e) =>
@@ -594,13 +648,13 @@ const exportToPDF = () => {
                       title: e.target.value,
                     })
                   }
-                  className="w-full p-3 border border-pink-600 rounded-md focus:ring-2 focus:ring-red-500"
+                  className="border-4 border-black bg-white px-4 py-2 min-w-[80px] text-center"
                   placeholder="Artwork Title"
                 />
               </div>
 
               <div>
-                <label className="block text-med text-pink-400 font-bold mb-2">Medium *</label>
+              <label className="uppercase text-med tracking-wide">Medium</label>
                 <input
                   type="text"
                   value={artworkDetails.medium}
@@ -610,12 +664,12 @@ const exportToPDF = () => {
                       medium: e.target.value,
                     })
                   }
-                  className="w-full p-3 border border-pink-600 rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="border-4 border-black bg-white px-4 py-2 min-w-[80px] text-center"
                   placeholder="Sculpture, Painting, etc."
                 />
               </div>
               <div>
-                <label className="block text-pink-400 text-med font-bold mb-2">Year Created</label>
+              <label className="uppercase text-med tracking-wide">year</label>
                 <input
                   type="number"
                   value={artworkDetails.yearCreated}
@@ -625,14 +679,14 @@ const exportToPDF = () => {
                       yearCreated: Number(e.target.value),
                     })
                   }
-                  className="w-full p-3 border border-pink-600 rounded-md focus:ring-2 focus:ring-indigo-500"
-                />
+                  className="border-4 border-black bg-white px-4 py-2 min-w-[80px] text-center"
+                  />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
               <div>
-                <label className="block text-med text-pink-400 font-bold mb-2">Width (inches)</label>
+              <label className="uppercase text-med tracking-wide">width (inches)</label>
                 <input
                   type="number"
                   value={artworkDetails.width}
@@ -642,12 +696,12 @@ const exportToPDF = () => {
                       width: Number(e.target.value),
                     })
                   }
-                  className="w-full p-3 border border-pink-600 rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="border-4 border-black bg-white px-4 py-2 min-w-[80px] text-center"
                   min="0"
                 />
               </div>
               <div>
-                <label className="block text-med text-pink-400 font-bold mb-2">Height (inches)</label>
+              <label className="uppercase text-med tracking-wide">Height</label>
                 <input
                   type="number"
                   value={artworkDetails.height}
@@ -657,12 +711,12 @@ const exportToPDF = () => {
                       height: Number(e.target.value),
                     })
                   }
-                  className="w-full p-3 border border-pink-600 rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="border-4 border-black bg-white px-4 py-2 min-w-[80px] text-center"
                   min="0"
                 />
               </div>
               <div>
-                <label className="block text-med text-pink-400 font-bold mb-2">Depth (inches)</label>
+              <label className="uppercase text-med tracking-wide">Depth (Inches)</label>
                 <input
                   type="number"
                   value={artworkDetails.depth}
@@ -672,7 +726,7 @@ const exportToPDF = () => {
                       depth: Number(e.target.value),
                     })
                   }
-                  className="w-full p-3 border border-pink-600 rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="border-4 border-black bg-white px-4 py-2 min-w-[80px] text-center"
                   min="0"
                 />
               </div>
@@ -680,7 +734,8 @@ const exportToPDF = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               <div>
-                <label className="block text-med text-pink-400 font-bold mb-2">Complexity</label>
+
+                <label className="uppercase text-med tracking-wide block text-med mb-2">Complexity</label>
                 <select
                   value={artworkDetails.complexity}
                   onChange={(e) =>
@@ -689,7 +744,7 @@ const exportToPDF = () => {
                       complexity: e.target.value as "low" | "medium" | "high",
                     })
                   }
-                  className="w-full p-3 border border-pink-600 rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="border-4 border-black bg-white px-4 py-2 min-w-[200px] text-center"
                 >
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
@@ -697,8 +752,8 @@ const exportToPDF = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-med text-pink-400 font-bold mb-2">Emotional Value</label>
-                <select
+              <label className="uppercase  tracking-wide block text-med mb-2">Emotional Value</label>
+              <select
                   value={artworkDetails.emotionalValue}
                   onChange={(e) =>
                     setArtworkDetails({
@@ -706,7 +761,7 @@ const exportToPDF = () => {
                       emotionalValue: e.target.value as "low" | "medium" | "high",
                     })
                   }
-                  className="w-full p-3 border border-pink-600 rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="border-4 border-black bg-white px-4 py-2 min-w-[200px] text-center"
                 >
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
@@ -716,7 +771,7 @@ const exportToPDF = () => {
             </div>
 
             <div className="mt-4">
-              <label className="block text-med text-pink-400 font-bold mb-2">Materials Used</label>
+              <label className="uppercase tracking-wide  mb-2">Materials Used</label>
               <textarea
                 value={artworkDetails.materialsUsed}
                 onChange={(e) =>
@@ -725,19 +780,32 @@ const exportToPDF = () => {
                     materialsUsed: e.target.value,
                   })
                 }
-                className="w-full p-3 border border-pink-600 rounded-md focus:ring-2 focus:ring-indigo-500"
+                className="border-4 border-black bg-white px-4 py-2 min-w-[650px] text-center"
                 rows={2}
                 placeholder="List all materials used..."
               />
             </div>
           </div>
-
+          </motion.div>
+          <br></br>
           {/* Costs Section */}
+          <motion.div 
+            className="border-4 border-black bg-white p-8 relative"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            whileHover={{ 
+              boxShadow: '8px 8px 0px 0px rgba(0,0,0,1)',
+              transition: { duration: 0.2 }
+            }}
+          >
+          <div className="absolute top-0 right-0 w-24 h-24 bg-[#FF006E] opacity-10 dither-pattern pointer-events-none"></div>
+
           <div className="mb-8">
-            <h2 className="text-4xl font-light mb-6 outline p-2 rounded-full text-orange-400">Costs</h2>
+            <h2 className="text-4xl font-light mb-6 outline p-2 rounded-full uppercase tracking-wide text-orange-500">Costs</h2>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
-                <label className="block text-orange-400 text-med font-bold mb-2">Materials ($)</label>
+              <label className="uppercase tracking-wide  mb-2">Materials ($)</label>
                 <input
                   type="number"
                   value={costs.materials}
@@ -747,12 +815,12 @@ const exportToPDF = () => {
                       materials: Number(e.target.value),
                     })
                   }
-                  className="w-full p-3 border border-orange-600 rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="border-4 border-black bg-white px-4 m-6 py-2 max-w-[140px] text-center"
                   min="0"
                 />
               </div>
               <div>
-                <label className="block text-orange-400 text-med font-bold mb-2">Framing ($)</label>
+              <label className="uppercase tracking-wide  mb-2">Framing ($)</label>
                 <input
                   type="number"
                   value={costs.framing}
@@ -762,31 +830,30 @@ const exportToPDF = () => {
                       framing: Number(e.target.value),
                     })
                   }
-                  className="w-full p-3 border border-orange-600 rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="border-4 border-black bg-white px-4 m-6 py-2 max-w-[140px] text-center"
                   min="0"
                 />
               </div>
               <div>
-                <label className="block text-med text-orange-400 font-bold mb-2">
-                  Studio Overhead (per artwork) ($)
+              <label className="uppercase tracking-wide  mb-2">Studio Overhead (per artwork)</label>
+                  
                   {/* <span className="text-xs text-gray-500 block font-normal">
                                     Your share of monthly studio costs for this piece
                                     </span> */}
-                </label>
                 <input
                   type="number"
                   value={costs.studio}
                   onChange={(e) => setCosts({ ...costs, studio: Number(e.target.value) })}
-                  className="w-full p-3 border border-orange-600 rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="border-4 border-black bg-white px-4 py-2 max-w-[140px] text-center"
                   min="0"
                   placeholder="50"
                 />
-                <p className="text-xs text-gray-300 mt-1">
+                <p className="text-xs text-black-300 mt-1">
                   Example: If studio rent is $1000/month and you make 20 pieces/month, enter $50
                 </p>
               </div>
               <div>
-                <label className="block text-med text-orange-400 font-bold mb-2">Other Costs ($)</label>
+              <label className="uppercase tracking-wide mb-4">Other ($)</label>
                 <input
                   type="number"
                   value={costs.other}
@@ -796,19 +863,33 @@ const exportToPDF = () => {
                       other: Number(e.target.value),
                     })
                   }
-                  className="w-full p-3 border border-orange-600 rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="border-4 border-black bg-white m-6 px-4 py-2 max-w-[140px] text-center"
                   min="0"
                 />
               </div>
             </div>
           </div>
+          </motion.div>
+          <br></br>
+
+          <motion.div 
+            className="border-4 border-black bg-white p-8 relative"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            whileHover={{ 
+              boxShadow: '8px 8px 0px 0px rgba(0,0,0,1)',
+              transition: { duration: 0.2 }
+            }}
+          >
+          <div className="absolute top-0 right-0 w-24 h-24 bg-[#FF006E] opacity-10 dither-pattern pointer-events-none"></div>
 
           {/* Time Investment Section */}
           <div className="mb-8">
-            <h2 className="text-4xl font-light mb-6 outline rounded-full p-2 text-yellow-400">Hours</h2>
+            <h2 className="text-4xl font-light mb-6 outline rounded-full p-2 rounded-full uppercase tracking-wide text-red-500">Hours</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-med text-yellow-400 font-bold mb-2">Concept Development</label>
+                <label className="uppercase text-med tracking-wide">Concept Development</label>
                 <input
                   type="number"
                   value={timeInvestment.conceptDevelopment}
@@ -818,13 +899,13 @@ const exportToPDF = () => {
                       conceptDevelopment: Number(e.target.value),
                     })
                   }
-                  className="w-full p-3 border border-yellow-400 rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="border-4 border-black bg-white px-4 py-2 max-w-[160px] text-center"
                   min="0"
                 />
               </div>
               <div>
-                <label className="block text-med text-yellow-400 font-bold mb-2">Creation</label>
-                <input
+              <label className="uppercase text-med tracking-wide">Creation</label>
+              <input
                   type="number"
                   value={timeInvestment.creation}
                   onChange={(e) =>
@@ -833,13 +914,13 @@ const exportToPDF = () => {
                       creation: Number(e.target.value),
                     })
                   }
-                  className="w-full p-3 border border-yellow-400 rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="border-4 border-black bg-white px-4 py-2 max-w-[160px] text-center"
                   min="0"
                 />
               </div>
               <div>
-                <label className="block text-med text-yellow-400 font-bold mb-2">Finishing</label>
-                <input
+              <label className="uppercase text-med tracking-wide">Finishing</label>
+              <input
                   type="number"
                   value={timeInvestment.finishing}
                   onChange={(e) =>
@@ -848,19 +929,34 @@ const exportToPDF = () => {
                       finishing: Number(e.target.value),
                     })
                   }
-                  className="w-full p-3 border border-yellow-400 rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="border-4 border-black bg-white px-4 py-2 max-w-[160px] text-center"
                   min="0"
                 />
               </div>
             </div>
           </div>
+          </motion.div>
+
+          <br></br>
+
+          <motion.div 
+            className="border-4 border-black bg-white p-8 relative"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            whileHover={{ 
+              boxShadow: '8px 8px 0px 0px rgba(0,0,0,1)',
+              transition: { duration: 0.2 }
+            }}
+          >
+          <div className="absolute top-0 right-0 w-24 h-24 bg-[#FF006E] opacity-10 dither-pattern pointer-events-none"></div>
 
           {/* Career Information Section */}
           <div className="mb-8">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-light mb-6 outline p-2 rounded-full text-red-400">Career Information</h2>
-              <h2 className="text-2xl font-light mb-6 outline p-2 rounded-full text-red-400">Enter manually or attach CV</h2>
-              <div className="border-2 border-line border-gray-300 rounded-lg p-4">
+              <h2 className="text-2xl font-light mb-6 outline p-1 rounded-full uppercase tracking-wide text-pink-500">Career Information</h2>
+              <h2 className="text-2xl font-light mb-6  rounded-full uppercase tracking-wide m-2 text-med text--500">Enter manually or attach CV</h2>
+              <div className="border-4 border-line border-pink-500 uppercase tracking-wide text-pink-500 rounded-lg p-4 pt-2">
                 <input
                   type="file"
                   accept=".pdf"
@@ -873,17 +969,17 @@ const exportToPDF = () => {
                   htmlFor="cv-upload"
                   className={`cursor-pointer flex items-center ${cvProcessing ? "opacity-50" : ""}`}
                 >
-                  <Upload className="w-5 h-5 mr-2 text-red-400" />
-                  <span className="text-sm text-red-400">{cvProcessing ? "Processing..." : "Upload CV (PDF)"}</span>
+                  <Upload className="w-5 h-5 mr-2 text-pink-400" />
+                  <span className="text-sm text-pink-400">{cvProcessing ? "Processing..." : "Upload CV (PDF)"}</span>
                 </label>
-                {cvError && <p className="text-red-500 text-xs mt-2">{cvError}</p>}
+                {cvError && <p className="text-pink-500 text-xs mt-2">{cvError}</p>}
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
               <div>
-                <label className="block text-med text-red-400 font-bold mb-2">Years of Experience</label>
-                <input
+              <label className="uppercase text-med tracking-wide"># of career Years</label>
+              <input
                   type="number"
                   value={careerInfo.yearsExperience}
                   onChange={(e) =>
@@ -892,13 +988,13 @@ const exportToPDF = () => {
                       yearsExperience: Number(e.target.value),
                     })
                   }
-                  className="w-full p-3 border border-red-400 rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="border-4 border-black bg-white px-4 py-2 max-w-[80px] text-center"
                   min="0"
                 />
               </div>
               <div>
-                <label className="block text-med text-red-400 font-bold mb-2">Number of Exhibitions</label>
-                <input
+              <label className="uppercase text-med tracking-wide"># of exhibitions</label>
+              <input
                   type="number"
                   value={careerInfo.exhibitions}
                   onChange={(e) =>
@@ -907,13 +1003,13 @@ const exportToPDF = () => {
                       exhibitions: Number(e.target.value),
                     })
                   }
-                  className="w-full p-3 border border-red-400 rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="border-4 border-black bg-white px-4 py-2 max-w-[80px] text-center"
                   min="0"
                 />
               </div>
               <div>
-                <label className="block text-med text-red-400 font-bold mb-2">Awards Won</label>
-                <input
+              <label className="uppercase text-med tracking-wide">awards won</label>
+              <input
                   type="number"
                   value={careerInfo.awards}
                   onChange={(e) =>
@@ -922,12 +1018,12 @@ const exportToPDF = () => {
                       awards: Number(e.target.value),
                     })
                   }
-                  className="w-full p-3 border border-red-400 rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="border-4 border-black bg-white px-4 m-6 py-2 max-w-[80px] text-center"
                   min="0"
                 />
               </div>
               <div>
-                <label className="block text-med text-red-400 font-bold mb-2">Residencies</label>
+              <label className="uppercase text-med tracking-wide">Residencies</label>
                 <input
                   type="number"
                   value={careerInfo.residencies}
@@ -937,12 +1033,12 @@ const exportToPDF = () => {
                       residencies: Number(e.target.value),
                     })
                   }
-                  className="w-full p-3 border border-red-400 rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="border-4 border-black bg-white px-4 m-6 py-2 max-w-[80px] text-center"
                   min="0"
                 />
               </div>
               <div>
-                <label className="block text-med text-red-400 font-bold mb-2">Fellowships</label>
+              <label className="uppercase text-med tracking-wide">Fellowships</label>
                 <input
                   type="number"
                   value={careerInfo.fellowships}
@@ -952,7 +1048,7 @@ const exportToPDF = () => {
                       fellowships: Number(e.target.value),
                     })
                   }
-                  className="w-full p-3 border border-red-400 rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="border-4 border-black bg-white px-4 py-2 m-6 max-w-[80px] text-center"
                   min="0"
                 />
               </div>
@@ -961,7 +1057,7 @@ const exportToPDF = () => {
             {/* Detailed information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               <div>
-                <label className="block text-med text-red-400 font-bold mb-2">Exhibition Details</label>
+              <label className="uppercase text-med tracking-wide">Exhibition Venues</label>
                 <textarea
                   value={careerInfo.exhibitionDetails}
                   onChange={(e) =>
@@ -970,13 +1066,13 @@ const exportToPDF = () => {
                       exhibitionDetails: e.target.value,
                     })
                   }
-                  className="w-full p-3 border border-red-400 rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="border-4 border-black bg-white px-16 py-2 max-w-[400px] text-center"
                   placeholder="MoMA PS1, Guggenheim, Venice Biennale..."
                   rows={2}
                 />
               </div>
               <div>
-                <label className="block text-med text-red-400 font-bold mb-2">Award Details</label>
+              <label className="uppercase text-med tracking-wide">Residencies</label>
                 <textarea
                   value={careerInfo.awardDetails}
                   onChange={(e) =>
@@ -985,13 +1081,13 @@ const exportToPDF = () => {
                       awardDetails: e.target.value,
                     })
                   }
-                  className="w-full p-3 border border-red-400 rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="border-4 border-black bg-white px-16 py-2 max-w-[400px] text-center"
                   placeholder="Guggenheim Fellowship, NEA Grant, Turner Prize..."
                   rows={2}
                 />
               </div>
               <div>
-                <label className="block text-med text-red-400 font-bold mb-2">Fellowship Details</label>
+              <label className="uppercase text-med tracking-wide">Fellowships</label>
                 <textarea
                   value={careerInfo.fellowshipDetails}
                   onChange={(e) =>
@@ -1000,13 +1096,13 @@ const exportToPDF = () => {
                       fellowshipDetails: e.target.value,
                     })
                   }
-                  className="w-full p-3 border border-red-400 rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="border-4 border-black bg-white px-16 py-2 max-w-[400px] text-center"
                   placeholder="Guggenheim Fellowship, More Art, Leslie Lohman..."
                   rows={2}
                 />
               </div>
               <div>
-                <label className="block text-med text-red-400 font-bold mb-2">Residency Details</label>
+              <label className="uppercase text-med tracking-wide">Residencies</label>
                 <textarea
                   value={careerInfo.residencyDetails}
                   onChange={(e) =>
@@ -1015,13 +1111,13 @@ const exportToPDF = () => {
                       residencyDetails: e.target.value,
                     })
                   }
-                  className="w-full p-3 border border-red-400 rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="border-4 border-black bg-white px-16 py-2 max-w-[400px] text-center"
                   placeholder="MacDowell, Yaddo, Skowhegan..."
                   rows={2}
                 />
               </div>
               <div>
-                <label className="block text-med text-red-400 font-bold mb-2">Publication Details</label>
+              <label className="uppercase text-med tracking-wide">Publications</label>
                 <textarea
                   value={careerInfo.publicationDetails}
                   onChange={(e) =>
@@ -1030,7 +1126,7 @@ const exportToPDF = () => {
                       publicationDetails: e.target.value,
                     })
                   }
-                  className="w-full p-3 border border-red-400 rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="border-4 border-black bg-white px-16 py-2 max-w-[400px] text-center"
                   placeholder="Artforum, Art in America, Frieze..."
                   rows={2}
                 />
@@ -1040,7 +1136,7 @@ const exportToPDF = () => {
             {/* Career Factors with CV Upload Option */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               <div>
-                <label className="block text-med text-red-400 font-bold mb-2">Publications</label>
+              <label className="uppercase text-med tracking-wide"># of Publications</label>
                 <input
                   type="number"
                   value={careerInfo.publications}
@@ -1050,12 +1146,12 @@ const exportToPDF = () => {
                       publications: Number(e.target.value),
                     })
                   }
-                  className="w-full p-3 border border-red-400 rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="border-4 border-black bg-white px-16 py-2 max-w-[400px] text-center"
                   min="0"
                 />
               </div>
               <div>
-                <label className="block text-med text-red-400 font-bold mb-2">Representation Level</label>
+              <label className="uppercase text-med tracking-wide">Representation Level</label>
                 <select
                   value={careerInfo.representation}
                   onChange={(e) =>
@@ -1064,7 +1160,7 @@ const exportToPDF = () => {
                       representation: e.target.value as "none" | "emerging" | "midsize" | "bluechip" | "megagallery",
                     })
                   }
-                  className="w-full p-3 border border-red-400 rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="border-4 border-black bg-white px-16 py-2.5 max-w-[400px] text-center"
                 >
                   <option value="none">No Representation</option>
                   <option value="emerging">Emerging Gallery</option>
@@ -1077,7 +1173,7 @@ const exportToPDF = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               <div>
-                <label className="block text-med text-red-400 font-bold mb-2">Education</label>
+              <label className="uppercase text-med tracking-wide">Education</label>
                 <input
                   type="text"
                   value={careerInfo.education}
@@ -1087,12 +1183,12 @@ const exportToPDF = () => {
                       education: e.target.value,
                     })
                   }
-                  className="w-full p-3 border border-red-400 rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="border-4 border-black bg-white px-16 py-2 max-w-[400px] text-center"
                   placeholder="MFA, BFA, etc."
                 />
               </div>
               <div>
-                <label className="block text-med text-red-400 font-bold mb-2">Portfolio Website</label>
+              <label className="uppercase text-med tracking-wide">Portfolio</label>
                 <input
                   type="text"
                   value={careerInfo.portfolio}
@@ -1102,19 +1198,34 @@ const exportToPDF = () => {
                       portfolio: e.target.value,
                     })
                   }
-                  className="w-full p-3 border border-red-400 rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="border-4 border-black bg-white px-16 py-2 max-w-[400px] text-center"
                   placeholder="https://..."
                 />
               </div>
             </div>
           </div>
+          </motion.div>
+          <br></br>
+
 
           {/* Market Factors Section */}
+          <motion.div 
+            className="border-4 border-black bg-white p-8 relative"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            whileHover={{ 
+              boxShadow: '8px 8px 0px 0px rgba(0,0,0,1)',
+              transition: { duration: 0.2 }
+            }}
+          >
+          <div className="absolute top-0 right-0 w-24 h-24 bg-[#FF006E] opacity-10 dither-pattern pointer-events-none"></div>
+
           <div className="mb-8">
-            <h2 className="text-4xl font-light outline rounded-full mb-6 p-2  text-purple-400">Market Factors</h2>
+            <h2 className="text-4xl font-light outline rounded-full mb-6 p-2  uppercase tracking-wide text-orange-500">Market Factors</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-med text-purple-400 font-bold mb-2">Demand Level</label>
+              <label className="uppercase text-med tracking-wide">Demand Level</label>
                 <select
                   value={marketFactors.demandLevel}
                   onChange={(e) =>
@@ -1123,7 +1234,7 @@ const exportToPDF = () => {
                       demandLevel: e.target.value as "low" | "medium" | "high",
                     })
                   }
-                  className="w-full p-3 border border-purple-500 rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="border-4 border-black bg-white px-16 py-2 max-w-[400px] text-center"
                 >
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
@@ -1131,7 +1242,7 @@ const exportToPDF = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-med text-purple-400 font-bold mb-2">Target Market</label>
+              <label className="uppercase text-med tracking-wide">Target Market</label>
                 <select
                   value={marketFactors.targetMarket}
                   onChange={(e) =>
@@ -1144,7 +1255,7 @@ const exportToPDF = () => {
                         | "institutions",
                     })
                   }
-                  className="w-full p-3 border border-purple-500 rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="border-4 border-black bg-white px-6 py-2 max-w-[400px] text-center"
                 >
                   <option value="students">Students</option>
                   <option value="emerging-collectors">Emerging Collectors</option>
@@ -1156,7 +1267,7 @@ const exportToPDF = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
               <div>
-                <label className="block text-med text-purple-400 font-bold mb-2">Economic Climate</label>
+              <label className="uppercase text-med tracking-wide">Economic Climate</label>
                 <select
                   value={marketFactors.economicClimate}
                   onChange={(e) =>
@@ -1165,7 +1276,7 @@ const exportToPDF = () => {
                       economicClimate: e.target.value as "recession" | "slow" | "stable" | "growing",
                     })
                   }
-                  className="w-full p-3 border border-purple-500 rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="border-4 border-black bg-white px-14 py-2 max-w-[400px] text-center"
                 >
                   <option value="recession">Recession</option>
                   <option value="slow">Slow</option>
@@ -1174,7 +1285,7 @@ const exportToPDF = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-med text-purple-400 font-bold mb-2">Location</label>
+              <label className="uppercase text-med tracking-wide">Location</label>
                 <input
                   type="text"
                   value={marketFactors.location}
@@ -1184,12 +1295,12 @@ const exportToPDF = () => {
                       location: e.target.value,
                     })
                   }
-                  className="w-full p-3 border border-purple-500 rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="border-4 border-black bg-white px-14 py-1.5 max-w-[200px] text-center"
                   placeholder="City/Country of where the work will be selling"
                 />
               </div>
               <div>
-                <label className="block text-med text-purple-400 font-bold mb-2">Trending Styles</label>
+              <label className="uppercase text-med tracking-wide">Trending Styles</label>
                 <input
                   type="text"
                   value={marketFactors.trendingStyles}
@@ -1199,18 +1310,20 @@ const exportToPDF = () => {
                       trendingStyles: e.target.value,
                     })
                   }
-                  className="w-full p-3 border border-purple-500 rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="border-4 border-black bg-white px-14 py-1.5 max-w-[200px] text-center"
                   placeholder="Abstract, Contemporary..."
                 />
               </div>
             </div>
           </div>
-          
+          </motion.div>
+          <br></br>
+
         {/* Calculate Button */}
         <button
           onClick={handleSubmit}
           disabled={isCalculating}
-          className="w-full bg-purple-400 text-white py-4 rounded-lg font-semibold hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-red-500 text-white py-4 rounded-lg font-semibold hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           //                            ^^^^^^^^^^^^ Fixed: was just "text-gray"
         >
           {isCalculating ? (
@@ -1425,18 +1538,31 @@ const exportToPDF = () => {
           </div>
         )}
 
+
         {/* Footer */}
-        <div className="mt-12 text-center text-sm text-gray-300">
+        <div className="mt-12 text-center text-sm text-black-300">
           <p>Pricing calculations are suggestions based on provided data.</p>
           <p className="mt-1">Always consider your local market conditions and personal circumstances.</p>
         </div>
       </div>
+      <br></br>
+
 
 
 
       {/* Creator Section */}
-      <div className="mt-16 mb-8">
-        <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-1 rounded-lg">
+      <motion.div 
+            className="border-4 border-black bg-white relative"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            whileHover={{ 
+              boxShadow: '8px 8px 0px 0px rgba(0,0,0,1)',
+              transition: { duration: 0.2 }
+            }}
+          >
+          <div className="absolute top-0 right-0 w-24 h-24 bg-[#FF006E] opacity-10 dither-pattern pointer-events-none"></div>
+          <div className="mt-16 mb-8">
           <div className="bg-white rounded-lg p-8">
             <div className="max-w-3xl mx-auto text-center">
               {/* Main message */}
@@ -1448,19 +1574,19 @@ const exportToPDF = () => {
 
               {/* Living site note */}
               <div className="bg-purple-50 rounded-lg p-4 mb-6">
-                                <p className="text-purple-800 text-sm font-medium">
+                                <p className="text-pink-800 text-sm font-medium">
                                     This is a living project that evolves
                                     with your input
                                 </p>
-                                <p className="text-purple-800 text-sm font-medium">
-                                    Updated 8/25/2025
+                                <p className="text-pink-800 text-sm font-medium">
+                                    Updated 11/11/2025
                                 </p>
                             </div>
 
               {/* Upcoming project */}
               <div className="border-t border-gray-200 pt-6 mt-6">
                 <h4 className="text-lg font-semibold text-gray-800 mb-3">
-                                    Coming Winter 2025: AI Art Assistant & Manager
+                                    Coming Spring 2026: AI Art Assistant & Manager
                                 </h4>
                                 <p className="text-gray-600 mb-4">
                                     I'm developing a comprehensive AI-powered
@@ -1472,13 +1598,13 @@ const exportToPDF = () => {
                 <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mt-6">
                   <a
                     href="mailto:artworthai@gmail.com?subject=Feedback on ARTWorth"
-                    className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-lg font-medium hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105"
+                    className="bg-gradient-to-r from-orange-500 to-pink-500 text-white px-6 py-3 rounded-lg font-medium hover:from-red-500 hover:to-pink-600 transition-all transform hover:scale-105"
                   >
                     Share Feedback
                   </a>
                   <a
                     href="mailto:artworthai@gmail.com?subject=Interested in supporting ARTWorth"
-                    className="bg-white border-2 border-purple-500 text-purple-600 px-6 py-3 rounded-lg font-medium hover:bg-purple-50 transition-all"
+                    className="bg-white border-2 border-pink-500 text-pink-500 px-6 py-3 rounded-lg font-medium hover:bg-purple-50 transition-all"
                   >
                     Support or Invest
                   </a>
@@ -1538,8 +1664,12 @@ const exportToPDF = () => {
               </div>
             </div>
           </div>
-        </div>
       </div>
+</motion.div>
+
+
+    </div>
+    </div>
     </div>
     </div>
   )

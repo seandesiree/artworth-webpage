@@ -16,6 +16,7 @@
     "framer-motion": "^12.23.12",
     "jspdf": "^3.0.1",
     "lucide-react": "^0.532.0",
+    "motion": "^12.23.24",
     "openai": "^5.10.2",
     "pdfjs-dist": "^5.4.54",
     "react": "^19.1.1",
